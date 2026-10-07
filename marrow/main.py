@@ -9,6 +9,7 @@ from pathlib import Path
 from marrow.bridge.api import BridgeApi
 from marrow.core.config import load_window_geometry, save_window_geometry
 from marrow.data.database import connect
+from marrow.services.voice_input import start_voice_hotkey_listener
 
 
 def _repo_root() -> Path:
@@ -79,6 +80,18 @@ def run() -> int:
         _persist_window(window)
 
     window.events.closing += on_closing
+
+    def _push_voice_transcript(text: str) -> None:
+        try:
+            safe = text.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ")
+            window.evaluate_js(
+                f"window.dispatchEvent(new CustomEvent('marrow-voice-transcript', "
+                f"{{detail:{{text:'{safe}'}}}}));"
+            )
+        except Exception:
+            pass
+
+    start_voice_hotkey_listener(on_text=_push_voice_transcript)
 
     try:
         webview.start(debug=_is_debug())

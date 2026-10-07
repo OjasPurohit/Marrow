@@ -16,6 +16,13 @@ export type ParseDraftItem = {
   warnings: string[];
   conversion_note?: string | null;
   alternatives?: { id: number; name: string; rank?: number }[];
+  decomposition?: {
+    food_name: string;
+    food_id: number | null;
+    grams: number;
+    energy_kcal: number | null;
+  }[];
+  recipe_cache_name?: string;
 };
 
 export type ParseFoodTextResponse = {
@@ -104,11 +111,13 @@ export async function confirmAndSaveLog(payload: {
   meal_tag: string;
   source_text?: string;
   items: {
-    food_id: number;
+    food_id?: number;
     amount: number;
     unit: string;
     match_confidence: string;
     raw_fragment?: string;
+    decomposition?: ParseDraftItem['decomposition'];
+    recipe_cache_name?: string;
   }[];
 }): Promise<{ log_id: number; entries: unknown[]; totals: { energy_kcal: number | null } }> {
   const a = api();

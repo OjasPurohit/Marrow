@@ -11,6 +11,8 @@ from marrow.data.foods.units import scale_nutrients
 from marrow.services.diary_log import list_diary_entries_for_date
 from marrow.services.diary_totals import MACRO_KEYS, summarize_diary_nutrients
 from marrow.services.food_repository import fetch_food_row, fetch_nutrients
+from marrow.core.groq_settings import groq_configured
+from marrow.services.groq_night_summary import maybe_groq_night_summary
 from marrow.services.user_profile import (
     energy_status_for_day,
     fetch_micronutrient_targets,
@@ -404,6 +406,13 @@ def get_night_review(
         targets,
         energy_balance,
     )
+    if groq_configured() and review.get("groq_summary") is None:
+        review["groq_summary"] = maybe_groq_night_summary(
+            energy_balance,
+            macro_totals,
+            review.get("summary_lines") or [],
+            review.get("flagged") or [],
+        )
     return {
         "log_date": day,
         "entry_count": len(diary_entries),

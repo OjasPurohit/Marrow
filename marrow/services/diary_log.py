@@ -17,6 +17,7 @@ from marrow.services.user_profile import (
     resolve_daily_macro_targets,
 )
 from marrow.services.nutrient_validation import collect_nutrient_warnings, nutrients_for_display
+from marrow.services.recipes import create_recipe
 
 MEAL_TAGS = frozenset(
     {"breakfast", "lunch", "dinner", "snack", "pre_workout", "post_workout"}
@@ -32,11 +33,48 @@ def _normalize_meal_tag(tag: str | None) -> str:
     return value if value in MEAL_TAGS else "snack"
 
 
+def _expand_items_for_save(conn: sqlite3.Connection, items: list[dict]) -> list[dict]:
+    expanded: list[dict] = []
+    for item in items:
+        decomposition = list(item.get("decomposition") or [])
+        matched = [row for row in decomposition if row.get("food_id") is not None]
+        if matched:
+            recipe_name = str(item.get("recipe_cache_name") or item.get("raw_fragment") or "Dish")
+            ingredients = [
+                {"food_id": int(row["food_id"]), "grams": float(row["grams"])} for row in matched
+            ]
+            try:
+                create_recipe(
+                    conn,
+                    recipe_name,
+                    1.0,
+                    ingredients,
+                    notes="Cached Groq dish decomposition",
+                )
+            except ValueError:
+                pass
+            for row in matched:
+                expanded.append(
+                    {
+                        "food_id": int(row["food_id"]),
+                        "amount": float(row["grams"]),
+                        "unit": "g",
+                        "match_confidence": item.get("match_confidence") or "ESTIMATED",
+                        "raw_fragment": item.get("raw_fragment"),
+                    }
+                )
+            continue
+        if item.get("food_id") is None:
+            raise ValueError("each item needs a food_id or a matched decomposition")
+        expanded.append(item)
+    return expanded
+
+
 def confirm_and_save_log(conn: sqlite3.Connection, payload: dict) -> dict:
     log_date = str(payload.get("log_date") or _local_today())
     meal_tag = _normalize_meal_tag(payload.get("meal_tag"))
     source_text = payload.get("source_text")
-    items = list(payload.get("items") or [])
+    items = _expand_items_for_save(conn, list(payload.get("items") or []))
     if not items:
         raise ValueError("at least one item is required")
 

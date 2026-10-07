@@ -3,6 +3,12 @@
 from __future__ import annotations
 
 from marrow.core.config import load_window_geometry, save_window_geometry
+from marrow.core.groq_settings import (
+    clear_groq_api_key,
+    groq_settings_public,
+    save_groq_settings,
+    set_groq_api_key,
+)
 from marrow.data.catalog_seed import catalog_seed_status
 from marrow.data.database import session
 from marrow.services.app_info import get_app_info
@@ -24,6 +30,7 @@ from marrow.services.user_profile import (
     update_macro_targets,
 )
 from marrow.services.night_review import get_night_review
+from marrow.services.voice_input import capture_and_transcribe, get_last_voice_transcript
 from marrow.services.weight_log import add_weight_entry, list_weight_entries
 
 
@@ -147,3 +154,38 @@ class BridgeApi:
     def list_weight_entries(self, limit: int = 90) -> list:
         with session() as conn:
             return list_weight_entries(conn, limit=limit)
+
+    def get_groq_settings(self) -> dict:
+        return groq_settings_public()
+
+    def update_groq_settings(self, payload: dict) -> dict:
+        allowed = {
+            "chat_model",
+            "whisper_model",
+            "request_timeout_sec",
+            "max_retries",
+            "enable_night_summary",
+            "enable_voice_hotkey",
+            "voice_hotkey",
+            "voice_record_seconds",
+        }
+        updates = {k: payload[k] for k in allowed if k in payload}
+        return save_groq_settings(updates)
+
+    def set_groq_api_key(self, api_key: str) -> dict:
+        set_groq_api_key(str(api_key))
+        return groq_settings_public()
+
+    def clear_groq_api_key(self) -> dict:
+        clear_groq_api_key()
+        return groq_settings_public()
+
+    def transcribe_voice_note(self, duration_sec: float | None = None) -> dict:
+        try:
+            text = capture_and_transcribe(duration_sec)
+            return {"text": text, "error": None}
+        except Exception as exc:  # noqa: BLE001 — bridge surface
+            return {"text": None, "error": str(exc)}
+
+    def poll_voice_transcript(self, clear: bool = True) -> dict:
+        return get_last_voice_transcript(clear=bool(clear))

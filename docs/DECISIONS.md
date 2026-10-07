@@ -161,3 +161,32 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 
 - `get_night_review(log_date?)` on the bridge.
 - Route `#/night-review` (nav **Review**); hand-built SVG macro split + micro bars (`MacroSplitSvg`, `MicroBarSvg`).
+
+## 2025-10-07 — M8 Groq integration (optional)
+
+### Credentials & settings
+
+- Groq API key stored with **python-keyring** (`Marrow` / `groq_api_key`); never written to `config.json`, SQLite, logs, or git.
+- Non-secret Groq options live under `config.json` → `groq` (chat + Whisper model names, timeouts, retries, voice hotkey, night-summary toggle).
+- `GROQ_API_KEY` env is supported for local dev/CI only; production path is keyring via bridge `set_groq_api_key` / `clear_groq_api_key`.
+
+### Parser pipeline (4b)
+
+1. **Local rule-based parser** unchanged (deterministic tests).
+2. **Groq JSON parse** when keyring key is set **and** local pass matches no foods: temperature `0`, `response_format: json_object`, schema `{food_name, quantity, unit, meal}`; optional `dish` + `ingredients[{food_name, grams}]` for decomposition.
+3. Nutrients always from DB (`convert_food_serving` / `aggregate_recipe_nutrients`); LLM output is never trusted for numbers.
+4. On confirm, matched decompositions expand to per-ingredient diary rows and are **cached as recipes** (`create_recipe`).
+
+### Voice (4c)
+
+- Optional global hotkey (`groq.voice_hotkey`, default `ctrl+shift+v`) records WAV in Python (`sounddevice`) and transcribes via Groq Whisper; transcript is dispatched to the UI (`marrow-voice-transcript`) and reuses `parse_food_text`.
+- Bridge: `transcribe_voice_note`, `poll_voice_transcript`; hotkey listener starts from `marrow.main` when configured.
+- Graceful offline: network/HTTP errors skip Groq stages; local parser and rule-based night review still work.
+
+### Night review
+
+- Optional `groq_summary` prose from **computed totals and rule lines only** (`groq_night_summary.py`); disabled when key missing or `enable_night_summary` is false.
+
+### Client
+
+- `marrow/services/groq_client.py` — urllib transport, timeouts, retry on 429/5xx; injectable transport for pytest.

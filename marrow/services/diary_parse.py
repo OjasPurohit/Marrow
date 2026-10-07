@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import re
 import sqlite3
 from typing import Literal
@@ -15,14 +14,14 @@ from marrow.services.food_text_parser import (
     parse_segment,
     split_log_segments,
 )
+from marrow.core.groq_settings import groq_configured
 from marrow.services.nutrient_validation import collect_nutrient_warnings, nutrients_for_display
 
 ParserStage = Literal["local", "groq", "none"]
 
 
 def groq_parser_configured() -> bool:
-    key = os.environ.get("GROQ_API_KEY", "").strip()
-    return bool(key)
+    return groq_configured()
 
 
 def _name_match_confidence(query: str, food_name: str, rank: float) -> MatchConfidence:
@@ -153,12 +152,32 @@ def parse_food_text(
 
     parser_used: ParserStage = "local"
     groq_available = groq_parser_configured()
+    groq_used = False
 
-    # Reserved Groq slot (M8): only runs when key present and local found nothing.
     if groq_available and text.strip() and all(i.get("food_id") is None for i in items):
-        parser_used = "groq"
-        # M8 will call Groq here; keep pipeline hook without network in M4.
-        pass
+        from marrow.services.groq_food_parse import parse_food_text_with_groq
+
+        groq_drafts = parse_food_text_with_groq(conn, text, meal_tag=meal_tag)
+        if groq_drafts:
+            items = groq_drafts
+            parser_used = "groq"
+            groq_used = True
+            resolved_meal = meal_tag
+            for draft in items:
+                tag = draft.pop("_meal_tag", None)
+                if isinstance(tag, str) and tag in (
+                    "breakfast",
+                    "lunch",
+                    "dinner",
+                    "snack",
+                    "pre_workout",
+                    "post_workout",
+                ):
+                    resolved_meal = tag
+            meal_tag = resolved_meal
+
+    for draft in items:
+        draft.pop("_meal_tag", None)
 
     return {
         "input": text,
@@ -166,5 +185,5 @@ def parse_food_text(
         "items": items,
         "parser": parser_used,
         "groq_available": groq_available,
-        "groq_used": False,
+        "groq_used": groq_used,
     }

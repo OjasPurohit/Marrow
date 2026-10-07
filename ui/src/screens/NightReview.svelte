@@ -91,12 +91,18 @@
     </section>
 
     {#if review.summary_lines.length}
-      <Card title="Summary" subtitle="Rule-based recap (Groq optional in M8)">
+      <Card title="Summary" subtitle="Rule-based recap">
         <ul class="summary">
           {#each review.summary_lines as line}
             <li>{line}</li>
           {/each}
         </ul>
+      </Card>
+    {/if}
+
+    {#if review.groq_summary}
+      <Card title="Groq recap" subtitle="From computed totals only">
+        <p class="groq-summary">{review.groq_summary}</p>
       </Card>
     {/if}
 

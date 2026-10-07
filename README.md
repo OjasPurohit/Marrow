@@ -89,7 +89,8 @@ tests/            pytest
 | **M5** Today & totals | Done | Rings/bars, meal groups, timeline, daily aggregation |
 | **M6** Goals & onboarding | Done | Mifflin-St Jeor, DB targets, deficit/surplus, weight log |
 | **M7** Night review | Done | Full-day micro report, flags, rule summary, `#/night-review` |
-| **M8+** Groq, sync | Planned | See project spec |
+| **M8** Groq (optional) | Done | Keyring API key, JSON parse + dish decomposition, Whisper voice hotkey, night summary |
+| **M9+** Sync, polish | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).
 

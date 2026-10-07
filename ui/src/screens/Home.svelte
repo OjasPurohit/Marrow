@@ -55,6 +55,15 @@
   onMount(async () => {
     await ensureDiaryBridge();
     await refreshToday();
+    const onVoice = (event: Event) => {
+      const detail = (event as CustomEvent<{ text?: string }>).detail;
+      if (detail?.text) {
+        logText = detail.text;
+        void handleParse();
+      }
+    };
+    window.addEventListener('marrow-voice-transcript', onVoice);
+    return () => window.removeEventListener('marrow-voice-transcript', onVoice);
   });
 
   async function handleParse() {
@@ -107,7 +116,9 @@
 
   async function handleSave() {
     error = null;
-    const items = drafts.filter((d) => d.food_id != null);
+    const items = drafts.filter(
+      (d) => d.food_id != null || (d.decomposition?.some((row) => row.food_id != null) ?? false),
+    );
     if (!items.length) {
       error = 'Add at least one matched food before saving.';
       return;
@@ -118,11 +129,13 @@
         meal_tag: mealTag,
         source_text: logText.trim(),
         items: items.map((d) => ({
-          food_id: d.food_id as number,
+          food_id: d.food_id ?? undefined,
           amount: d.amount,
           unit: d.unit,
           match_confidence: d.match_confidence,
           raw_fragment: d.raw_fragment,
+          decomposition: d.decomposition,
+          recipe_cache_name: d.recipe_cache_name,
         })),
       });
       showConfirm = false;
@@ -222,6 +235,18 @@
                 <span>{item.unit}</span>
                 <span>{formatKcal(item.energy_kcal)} kcal</span>
               </div>
+              {#if item.decomposition?.length}
+                <ul class="decomp text-caption">
+                  {#each item.decomposition as row}
+                    <li>
+                      {row.food_name} — {formatGrams(row.grams)}
+                      {#if row.energy_kcal != null}
+                        · {formatKcal(row.energy_kcal)} kcal
+                      {/if}
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
               {#if item.warnings?.length}
                 <p class="warn text-caption">{item.warnings.join(', ')}</p>
               {/if}
@@ -456,6 +481,12 @@
   .error {
     color: var(--color-danger, #c44);
     margin: var(--space-3) 0 0;
+  }
+
+  .decomp {
+    margin: 0.35rem 0 0;
+    padding-left: 1rem;
+    opacity: 0.85;
   }
 
   .confirm {
