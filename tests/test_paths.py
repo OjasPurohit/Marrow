@@ -1,6 +1,6 @@
 """Path helpers."""
 
-from marrow.core.paths import APP_NAME, app_data_dir, database_path
+from marrow.core.paths import APP_NAME, app_data_dir, bundled_foods_catalog_path, database_path
 
 
 def test_app_data_dir_contains_app_name():
@@ -10,3 +10,9 @@ def test_app_data_dir_contains_app_name():
 
 def test_database_under_app_data():
     assert database_path().parent == app_data_dir()
+
+
+def test_bundled_foods_catalog_in_repo():
+    path = bundled_foods_catalog_path()
+    assert path.name == "foods_catalog.sqlite"
+    assert path.exists()

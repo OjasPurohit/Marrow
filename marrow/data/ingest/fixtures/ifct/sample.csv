@@ -1,0 +1,6 @@
+food_code,food_name,preparation,energy_kcal,protein_g,carbs_g,fat_g,fiber_g,calcium_mg,iron_mg,vitamin_c_mg
+IFCT001,Chapati, cooked,297,11.8,46.4,7.4,4.9,45,3.2,0
+IFCT002,Dal masoor, cooked,104,7.0,17.7,0.4,2.1,22,1.5,1.2
+IFCT003,Paneer, raw,265,18.3,2.6,20.8,0,480,0.9,0
+IFCT004,Idli, cooked,157,4.1,33.5,0.5,1.2,15,0.6,0
+IFCT005,Curd, raw,60,3.5,4.7,3.3,0,149,0.1,1.0

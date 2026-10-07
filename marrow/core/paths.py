@@ -32,6 +32,16 @@ def database_path() -> Path:
     return app_data_dir() / "marrow.db"
 
 
+def repo_root() -> Path:
+    """Repository root (for bundled dev assets)."""
+    return Path(__file__).resolve().parents[2]
+
+
+def bundled_foods_catalog_path() -> Path:
+    """Pre-built offline food subset shipped with the app for dev/demo."""
+    return repo_root() / "marrow" / "data" / "processed" / "foods_catalog.sqlite"
+
+
 def config_path() -> Path:
     return app_data_dir() / "config.json"
 

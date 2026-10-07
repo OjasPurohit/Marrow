@@ -1,0 +1,82 @@
+{
+  "FoundationFoods": [
+    {
+      "fdcId": 173944,
+      "description": "Banana, raw",
+      "dataType": "Foundation",
+      "foodCategory": "Fruits and Fruit Juices",
+      "foodNutrients": [
+        { "nutrient": { "id": 1008 }, "amount": 89 },
+        { "nutrient": { "id": 1003 }, "amount": 1.09 },
+        { "nutrient": { "id": 1005 }, "amount": 22.84 },
+        { "nutrient": { "id": 1004 }, "amount": 0.33 },
+        { "nutrient": { "id": 1079 }, "amount": 2.6 },
+        { "nutrient": { "id": 2000 }, "amount": 12.23 },
+        { "nutrient": { "id": 1092 }, "amount": 358 },
+        { "nutrient": { "id": 1087 }, "amount": 5 },
+        { "nutrient": { "id": 1162 }, "amount": 8.7 }
+      ],
+      "foodPortions": [
+        {
+          "amount": 1,
+          "measureUnit": { "name": "medium" },
+          "modifier": "medium",
+          "gramWeight": 118,
+          "portionDescription": "1 medium"
+        }
+      ]
+    },
+    {
+      "fdcId": 171688,
+      "description": "Chicken breast, grilled",
+      "dataType": "SR Legacy",
+      "foodCategory": "Poultry Products",
+      "foodNutrients": [
+        { "nutrient": { "id": 1008 }, "amount": 165 },
+        { "nutrient": { "id": 1003 }, "amount": 31.02 },
+        { "nutrient": { "id": 1005 }, "amount": 0 },
+        { "nutrient": { "id": 1004 }, "amount": 3.57 },
+        { "nutrient": { "id": 1093 }, "amount": 74 },
+        { "nutrient": { "id": 1253 }, "amount": 85 }
+      ]
+    },
+    {
+      "fdcId": 174259,
+      "description": "Rice, white, cooked",
+      "dataType": "SR Legacy",
+      "foodCategory": "Cereal Grains and Pasta",
+      "foodNutrients": [
+        { "nutrient": { "id": 1008 }, "amount": 130 },
+        { "nutrient": { "id": 1003 }, "amount": 2.69 },
+        { "nutrient": { "id": 1005 }, "amount": 28.17 },
+        { "nutrient": { "id": 1004 }, "amount": 0.28 },
+        { "nutrient": { "id": 1093 }, "amount": 1 }
+      ]
+    },
+    {
+      "fdcId": 168462,
+      "description": "Spinach, raw",
+      "dataType": "SR Legacy",
+      "foodNutrients": [
+        { "nutrient": { "id": 1008 }, "amount": 23 },
+        { "nutrient": { "id": 1003 }, "amount": 2.86 },
+        { "nutrient": { "id": 1005 }, "amount": 3.63 },
+        { "nutrient": { "id": 1004 }, "amount": 0.39 },
+        { "nutrient": { "id": 1089 }, "amount": 2.71 },
+        { "nutrient": { "id": 1162 }, "amount": 28.1 }
+      ]
+    },
+    {
+      "fdcId": 169738,
+      "description": "Milk, whole",
+      "dataType": "SR Legacy",
+      "foodNutrients": [
+        { "nutrient": { "id": 1008 }, "amount": 61 },
+        { "nutrient": { "id": 1003 }, "amount": 3.15 },
+        { "nutrient": { "id": 1005 }, "amount": 4.8 },
+        { "nutrient": { "id": 1004 }, "amount": 3.25 },
+        { "nutrient": { "id": 1087 }, "amount": 113 }
+      ]
+    }
+  ]
+}

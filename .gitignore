@@ -44,6 +44,10 @@ marrow.spec
 *.db
 *.sqlite
 *.sqlite3
+!marrow/data/processed/*.sqlite
+
+# Ingestion raw downloads (re-fetch via scripts/build_food_catalog.py --network)
+marrow/data/ingest/cache/
 
 # Cloned reference repos
 /skills-ref/

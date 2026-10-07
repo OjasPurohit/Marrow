@@ -52,6 +52,22 @@ pytest
 cd ui && npm test
 ```
 
+## Food catalog (M2)
+
+Offline food data uses a unified SQLite schema (see `marrow/data/migrations/002_food_catalog.sql`). A small **processed subset** for dev/demo is committed at:
+
+`marrow/data/processed/foods_catalog.sqlite`
+
+Regenerate from fixtures (and optionally the network):
+
+```bash
+python3 scripts/build_food_catalog.py
+# optional live USDA + OFF samples (requires USDA_FDC_API_KEY for FDC API):
+python3 scripts/build_food_catalog.py --network
+```
+
+Raw downloads are written to `marrow/data/ingest/cache/` (gitignored). Do not commit full USDA/OFF dumps; see [docs/DECISIONS.md](docs/DECISIONS.md).
+
 ## Repository layout
 
 ```
@@ -67,8 +83,8 @@ tests/            pytest
 |-----------|--------|-------|
 | **M1** Scaffold | Done | pywebview shell, bridge, SQLite migrations, Svelte UI tokens |
 | **M1b** Design lab | Done | Dev-only component gallery + interaction lab (`#/gallery`) |
-| **M2** Food ingestion | Planned | USDA / Open Food Facts pipeline, search UI |
-| **M3** Diary & meals | Planned | Logging, portions, daily totals |
+| **M2** Food ingestion | Done | Unified schema, ingest pipeline, bundled catalog subset |
+| **M3** Search & diary | Planned | Food search UI, logging, portions, daily totals |
 | **M4+** Goals, charts, sync | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).
