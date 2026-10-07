@@ -24,6 +24,13 @@
       >
         Today
       </button>
+      <button
+        type="button"
+        class:active={route === 'foods'}
+        onclick={() => onNavigate?.('foods')}
+      >
+        Foods
+      </button>
       {#if dev}
         <button
           type="button"

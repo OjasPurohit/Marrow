@@ -84,7 +84,8 @@ tests/            pytest
 | **M1** Scaffold | Done | pywebview shell, bridge, SQLite migrations, Svelte UI tokens |
 | **M1b** Design lab | Done | Dev-only component gallery + interaction lab (`#/gallery`) |
 | **M2** Food ingestion | Done | Unified schema, ingest pipeline, bundled catalog subset |
-| **M3** Search & diary | Planned | Food search UI, logging, portions, daily totals |
+| **M3** Food search | Done | FTS5 search, serving conversion, custom foods & recipes |
+| **M4** Diary | Planned | Logging, portions, daily totals |
 | **M4+** Goals, charts, sync | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).

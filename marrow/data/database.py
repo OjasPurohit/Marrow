@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from typing import Iterator
 
 from marrow.core.paths import database_path
+from marrow.data.catalog_seed import ensure_catalog_seeded
 from marrow.data.migrator import migrate
 
 
@@ -18,6 +19,7 @@ def connect() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     migrate(conn)
+    ensure_catalog_seeded(conn)
     return conn
 
 

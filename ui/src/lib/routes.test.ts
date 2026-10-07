@@ -11,8 +11,13 @@ describe('routes', () => {
     expect(parseRoute('#/gallery')).toBe('gallery');
   });
 
+  it('parses foods', () => {
+    expect(parseRoute('#/foods')).toBe('foods');
+  });
+
   it('builds hrefs', () => {
     expect(routeHref('gallery')).toBe('#/gallery');
+    expect(routeHref('foods')).toBe('#/foods');
     expect(routeHref('home')).toBe('#/');
   });
 });

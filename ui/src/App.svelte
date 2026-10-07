@@ -3,6 +3,7 @@
   import Chrome from '@/components/Chrome.svelte';
   import { parseRoute, type Route } from '@/lib/routes';
   import Home from '@/screens/Home.svelte';
+  import Foods from '@/screens/Foods.svelte';
   import Gallery from '@/screens/gallery/Gallery.svelte';
 
   let route: Route = $state('home');
@@ -12,7 +13,9 @@
   }
 
   function navigate(next: Route) {
-    location.hash = next === 'gallery' ? '/gallery' : '/';
+    if (next === 'gallery') location.hash = '/gallery';
+    else if (next === 'foods') location.hash = '/foods';
+    else location.hash = '/';
   }
 
   onMount(() => {
@@ -25,6 +28,8 @@
 <Chrome {route} onNavigate={navigate} />
 {#if route === 'gallery' && import.meta.env.DEV}
   <Gallery />
+{:else if route === 'foods'}
+  <Foods />
 {:else}
   <Home />
 {/if}
