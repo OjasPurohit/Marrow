@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend
+node_modules/
+ui/dist/
+ui/.svelte-kit/
+*.local
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# PyInstaller / Windows build artifacts
+*.spec.bak
+marrow.spec
+
+# User data (never in repo)
+*.db
+*.sqlite
+*.sqlite3
+
+# Cloned reference repos
+/skills-ref/
+/tmp/
+
+# Logs
+*.log
+npm-debug.log*

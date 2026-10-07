@@ -1,0 +1,23 @@
+[project]
+name = "marrow"
+version = "0.1.0"
+description = "Premium offline diet & nutrition tracker"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pywebview>=5.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+marrow = "marrow.main:run"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

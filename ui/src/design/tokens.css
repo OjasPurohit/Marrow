@@ -1,0 +1,104 @@
+/**
+ * Marrow design tokens — Apple-grade dark-first nutrition UI.
+ * Typography tracking/leading follow apple-design skill (size-specific).
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Canvas */
+  --color-bg: #0d0d0f;
+  --color-bg-elevated: #16161a;
+  --color-bg-grouped: #1c1c21;
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-hover: rgba(255, 255, 255, 0.09);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Accent — warm marrow / vitality */
+  --color-accent: #e8a87c;
+  --color-accent-muted: rgba(232, 168, 124, 0.35);
+  --color-accent-press: #d4956a;
+
+  /* Semantic */
+  --color-text: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.62);
+  --color-text-tertiary: rgba(255, 255, 255, 0.42);
+  --color-success: #6bcf8e;
+  --color-warning: #f0c14a;
+  --color-danger: #ff6b6b;
+
+  /* Materials */
+  --material-chrome: rgba(22, 22, 26, 0.72);
+  --material-blur: 24px;
+  --material-saturate: 180%;
+
+  /* Spacing (rem — scales with user font size) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
+
+  /* Motion — critically damped default (apple-design) */
+  --spring-response: 0.4;
+  --spring-bounce-ui: 0;
+  --spring-bounce-gesture: 0.2;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-instant: 100ms;
+  --duration-fast: 180ms;
+  --duration-normal: 280ms;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 100%;
+  line-height: 1.5;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --color-bg: #f5f5f7;
+    --color-bg-elevated: #ffffff;
+    --color-bg-grouped: #ebebed;
+    --color-surface: rgba(0, 0, 0, 0.04);
+    --color-surface-hover: rgba(0, 0, 0, 0.07);
+    --color-border-subtle: rgba(0, 0, 0, 0.08);
+    --color-border-strong: rgba(0, 0, 0, 0.12);
+    --color-text: rgba(0, 0, 0, 0.88);
+    --color-text-secondary: rgba(0, 0, 0, 0.55);
+    --color-text-tertiary: rgba(0, 0, 0, 0.38);
+    --material-chrome: rgba(255, 255, 255, 0.72);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material-chrome: var(--color-bg-elevated);
+    --material-blur: 0px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border-subtle: var(--color-border-strong);
+    --material-chrome: var(--color-bg-elevated);
+  }
+}
