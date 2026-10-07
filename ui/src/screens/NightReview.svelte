@@ -4,6 +4,7 @@
   import MacroBar from '@/components/MacroBar.svelte';
   import MacroSplitSvg from '@/components/MacroSplitSvg.svelte';
   import MicroBarSvg from '@/components/MicroBarSvg.svelte';
+  import EmptyState from '@/components/EmptyState.svelte';
   import NutrientRing from '@/components/NutrientRing.svelte';
   import { getNightReview, type NightReviewResponse } from '@/lib/nightReview';
   import { parseHashQuery } from '@/lib/routes';
@@ -88,6 +89,13 @@
     <p class="text-caption">Loading day report…</p>
   {:else if error}
     <p class="error">{error}</p>
+  {:else if review && review.entry_count === 0}
+    <EmptyState
+      title="Nothing logged for this day"
+      detail="Add meals on Today or pick another day from History."
+      actionLabel="Back to Today"
+      onAction={() => { location.hash = '#/'; }}
+    />
   {:else if review}
     <section class="verdict" data-status={balance?.status ?? 'none'}>
       <h2 class="text-title-2">{balanceLabel(balance?.status)}</h2>

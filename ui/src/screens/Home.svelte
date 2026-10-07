@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Button from '@/components/Button.svelte';
   import Card from '@/components/Card.svelte';
+  import EmptyState from '@/components/EmptyState.svelte';
   import MacroBar from '@/components/MacroBar.svelte';
   import NutrientRing from '@/components/NutrientRing.svelte';
   import {
@@ -438,7 +439,10 @@
         </article>
       {/each}
     {:else}
-      <p class="text-caption empty">Nothing logged yet today.</p>
+      <EmptyState
+        title="No meals logged yet"
+        detail="Use quick log below or Ctrl+L to add your first entry for today."
+      />
     {/if}
   </section>
 
@@ -458,7 +462,10 @@
         {/each}
       </ol>
     {:else}
-      <p class="text-caption empty">Your day’s log will appear here in order.</p>
+      <EmptyState
+        title="Timeline is empty"
+        detail="Entries appear here in the order you log them through the day."
+      />
     {/if}
   </section>
 </main>

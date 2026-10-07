@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Card from '@/components/Card.svelte';
   import CalendarHeatmap from '@/components/CalendarHeatmap.svelte';
+  import EmptyState from '@/components/EmptyState.svelte';
   import {
     getDiaryHistoryMonth,
     type DiaryHistoryPayload,
@@ -110,7 +111,12 @@
 
   <Card title="Recent days" subtitle="Newest logged days in this month">
     {#if recentDays.length === 0}
-      <p class="text-caption">No entries yet this month.</p>
+      <EmptyState
+        title="No logged days this month"
+        detail="Log meals on Today — days will show up here with balance colors on the calendar."
+        actionLabel="Go to Today"
+        onAction={() => { location.hash = '#/'; }}
+      />
     {:else}
       <ul class="day-list">
         {#each recentDays as day}

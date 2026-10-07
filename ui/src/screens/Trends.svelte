@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Card from '@/components/Card.svelte';
+  import EmptyState from '@/components/EmptyState.svelte';
   import TrendLineSvg from '@/components/TrendLineSvg.svelte';
   import { getUserProfile, type UserProfile } from '@/lib/profile';
   import {
@@ -120,6 +121,14 @@
   {:else if error}
     <p class="error">{error}</p>
   {:else if trends}
+    {#if trends.days_logged === 0}
+      <EmptyState
+        title="Not enough history yet"
+        detail="Log a few days on Today — trends and rolling averages will appear here."
+        actionLabel="Go to Today"
+        onAction={() => { location.hash = '#/'; }}
+      />
+    {/if}
     <Card title="Intake" subtitle="Solid = daily · dashed = 7-day rolling average">
       <TrendLineSvg
         dates={trends.dates}

@@ -13,4 +13,5 @@ describe('motion helpers', () => {
     expect(large).toBeLessThan(100);
     expect(large / 100).toBeLessThan(small / 10);
   });
+
 });

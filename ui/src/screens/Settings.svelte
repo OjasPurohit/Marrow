@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Button from '@/components/Button.svelte';
   import Card from '@/components/Card.svelte';
+  import { getAppInfo, type AppInfo } from '@/lib/bridge';
   import { applyUserSettings } from '@/lib/applyPreferences';
   import {
     clearGroqApiKey,
@@ -34,6 +35,7 @@
   let status = $state<string | null>(null);
   let error = $state<string | null>(null);
   let busy = $state(false);
+  let appInfo = $state<AppInfo | null>(null);
 
   async function refresh() {
     await ensureSettingsBridge();
@@ -41,6 +43,7 @@
     groq = await getGroqSettings();
     sync = await getDataSyncStatus();
     backups = await listBackups();
+    appInfo = await getAppInfo();
     if (settings) applyUserSettings(settings);
   }
 
@@ -210,6 +213,9 @@
     </Card>
 
     <Card title="Accessibility" subtitle="Overrides system preferences when enabled">
+      <p class="text-caption">
+        When reduced motion is off, Marrow still respects your OS “reduce motion” setting via CSS. Turn on the toggle below to force reduced motion in-app.
+      </p>
       <div class="checks">
         <label><input type="checkbox" checked={settings.reduced_motion} onchange={(e) => saveSettings({ reduced_motion: e.currentTarget.checked })} /> Reduced motion</label>
         <label><input type="checkbox" checked={settings.reduced_transparency} onchange={(e) => saveSettings({ reduced_transparency: e.currentTarget.checked })} /> Reduced transparency</label>
@@ -278,6 +284,17 @@
       <p class="text-caption">No file backups yet.</p>
     {/if}
   </Card>
+
+  {#if appInfo}
+    <Card title="About Marrow" subtitle="Version and data location">
+      <dl class="about">
+        <div><dt>Version</dt><dd>{appInfo.version}</dd></div>
+        <div><dt>Platform</dt><dd>{appInfo.platform}</dd></div>
+        <div><dt>Schema</dt><dd>v{appInfo.schema_version}</dd></div>
+        <div><dt>Data folder</dt><dd class="mono">{appInfo.data_dir}</dd></div>
+      </dl>
+    </Card>
+  {/if}
 
   <Card title="Keyboard shortcuts" subtitle="Global">
     <ul class="shortcuts">
@@ -401,5 +418,32 @@
     border-radius: 4px;
     border: 1px solid var(--color-border-subtle);
     background: var(--color-surface);
+  }
+
+  .about {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  .about div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: var(--space-2);
+  }
+
+  .about dt {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .about dd {
+    margin: 0;
+  }
+
+  .mono {
+    font-family: ui-monospace, monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
   }
 </style>

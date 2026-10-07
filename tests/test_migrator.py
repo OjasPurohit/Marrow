@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from marrow.data.migrator import MIGRATIONS_DIR, migrate, current_schema_version
+from marrow.core.paths import migrations_dir
+from marrow.data.migrator import migrate, current_schema_version
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ def test_migrations_apply(memory_conn, monkeypatch):
             "CREATE TABLE t (id INTEGER PRIMARY KEY);",
             encoding="utf-8",
         )
-        monkeypatch.setattr("marrow.data.migrator.MIGRATIONS_DIR", mig_dir)
+        monkeypatch.setattr("marrow.data.migrator.migrations_dir", lambda: mig_dir)
         applied = migrate(memory_conn)
         assert applied == [1]
         assert current_schema_version(memory_conn) == 1
@@ -33,6 +34,7 @@ def test_migrations_apply(memory_conn, monkeypatch):
 
 
 def test_real_migrations_exist():
-    assert MIGRATIONS_DIR.exists()
-    files = list(MIGRATIONS_DIR.glob("*.sql"))
+    mig = migrations_dir()
+    assert mig.exists()
+    files = list(mig.glob("*.sql"))
     assert len(files) >= 1

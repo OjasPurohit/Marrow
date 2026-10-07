@@ -38,7 +38,7 @@ Thumbs.db
 
 # PyInstaller / Windows build artifacts
 *.spec.bak
-marrow.spec
+/marrow.spec
 
 # User data (never in repo)
 *.db

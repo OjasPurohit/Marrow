@@ -103,7 +103,7 @@
 {#if open}
   <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
   <div class="backdrop" role="presentation" onclick={onClose}></div>
-  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette" onkeydown={onKeydown}>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette" tabindex="-1" onkeydown={onKeydown}>
     <input
       class="search"
       type="search"
@@ -155,6 +155,7 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
     z-index: 40;
+    animation: fade-in var(--duration-fast) var(--ease-out-quart);
   }
 
   .palette {
@@ -162,6 +163,7 @@
     top: 12vh;
     left: 50%;
     transform: translateX(-50%);
+    animation: palette-in var(--duration-normal) var(--ease-out-quart);
     width: min(560px, calc(100vw - 2rem));
     z-index: 50;
     background: var(--color-bg-elevated);
@@ -212,5 +214,40 @@
   .hint {
     color: var(--color-text-tertiary);
     margin: 0;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes palette-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .backdrop,
+    .palette {
+      animation: none;
+    }
+  }
+
+</style>
+
+<style>
+  :global(html[data-reduced-motion='true']) .backdrop,
+  :global(html[data-reduced-motion='true']) .palette {
+    animation: none !important;
   }
 </style>

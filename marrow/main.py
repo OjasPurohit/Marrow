@@ -4,21 +4,17 @@ from __future__ import annotations
 
 import os
 import sys
-from pathlib import Path
 
 from marrow.bridge.api import BridgeApi
 from marrow.core.config import load_window_geometry, save_window_geometry
+from marrow.core.paths import ui_dist_index
 from marrow.data.database import connect
 from marrow.services.voice_input import start_voice_hotkey_listener
 
 
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parent.parent
-
-
 def _ui_url() -> str:
     dev = os.environ.get("MARROW_DEV", "").strip() in ("1", "true", "yes")
-    dist_index = _repo_root() / "ui" / "dist" / "index.html"
+    dist_index = ui_dist_index()
     if dev or not dist_index.exists():
         port = os.environ.get("MARROW_VITE_PORT", "5173")
         return f"http://127.0.0.1:{port}"

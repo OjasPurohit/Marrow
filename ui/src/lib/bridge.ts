@@ -45,7 +45,7 @@ export async function getAppInfo(): Promise<AppInfo> {
   if (a) return a.get_app_info() as Promise<AppInfo>;
   return {
     name: 'Marrow',
-    version: '0.1.0-dev',
+    version: '1.0.0-dev',
     platform: 'browser',
     python: '—',
     data_dir: '—',

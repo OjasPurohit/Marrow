@@ -36,6 +36,21 @@ export function rubberband(overshoot: number, dimension: number, constant = 0.55
 }
 
 export function prefersReducedMotion(): boolean {
-  return typeof matchMedia !== 'undefined' &&
-    matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (typeof document !== 'undefined') {
+    if (document.documentElement.dataset.reducedMotion === 'true') return true;
+  }
+  return (
+    typeof matchMedia !== 'undefined' &&
+    matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
+/** Spring preset that collapses to a short tween when reduced motion is on. */
+export function motionSpring(
+  preset: { type: 'spring'; bounce: number; duration: number },
+): { type: 'spring'; bounce: number; duration: number } | { duration: number } {
+  if (prefersReducedMotion()) {
+    return { duration: 0.01 };
+  }
+  return preset;
 }

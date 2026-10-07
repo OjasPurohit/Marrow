@@ -1,2 +1,4 @@
 -r requirements.txt
 ruff>=0.6
+pyinstaller>=6.0
+pillow>=10.0

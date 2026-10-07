@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Card from '@/components/Card.svelte';
+  import EmptyState from '@/components/EmptyState.svelte';
   import {
     ensureFoodBridge,
     searchFoods,
@@ -76,26 +77,35 @@
         {/if}
       </div>
 
-      <ul class="results" role="listbox" aria-label="Food results">
-        {#each results as item (item.id)}
-          <li role="option">
-            <div class="row">
-              <span class="name">{item.name}</span>
-              <span class="tags">
-                <span class="tag">{item.source}</span>
-                {#if item.preparation !== 'unknown'}
-                  <span class="tag">{item.preparation}</span>
-                {/if}
-              </span>
-            </div>
-            {#if item.brand}
-              <span class="brand">{item.brand}</span>
+      {#if !loading && query.trim().length >= 2 && results.length === 0}
+        <EmptyState
+          title="No foods matched"
+          detail="Try a shorter spelling, a generic name (rice, dal), or check Settings for catalog status."
+        />
+      {:else}
+        <ul class="results" role="listbox" aria-label="Food results">
+          {#each results as item (item.id)}
+            <li role="option" aria-selected="false">
+              <div class="row">
+                <span class="name">{item.name}</span>
+                <span class="tags">
+                  <span class="tag">{item.source}</span>
+                  {#if item.preparation !== 'unknown'}
+                    <span class="tag">{item.preparation}</span>
+                  {/if}
+                </span>
+              </div>
+              {#if item.brand}
+                <span class="brand">{item.brand}</span>
+              {/if}
+            </li>
+          {:else}
+            {#if query.trim().length < 2}
+              <li class="hint text-caption">Type at least two characters to search the offline catalog.</li>
             {/if}
-          </li>
-        {:else}
-          <li class="empty">No matches yet — try another spelling.</li>
-        {/each}
-      </ul>
+          {/each}
+        </ul>
+      {/if}
     </Card>
   </div>
 </main>
@@ -194,8 +204,14 @@
     transition: background var(--duration-fast) var(--ease-out-quart);
   }
 
-  .results li:not(.empty):hover {
+  .results li[role='option']:hover {
     background: var(--color-surface-hover);
+  }
+
+  .hint {
+    padding: var(--space-4);
+    color: var(--color-text-secondary);
+    text-align: center;
   }
 
   .row {
@@ -230,9 +246,4 @@
     color: var(--color-text-tertiary);
   }
 
-  .empty {
-    color: var(--color-text-secondary);
-    text-align: center;
-    padding: var(--space-6);
-  }
 </style>

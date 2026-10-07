@@ -32,14 +32,37 @@ def database_path() -> Path:
     return app_data_dir() / "marrow.db"
 
 
-def repo_root() -> Path:
-    """Repository root (for bundled dev assets)."""
+def install_root() -> Path:
+    """Install / bundle root — repo in dev, PyInstaller ``_MEIPASS`` when frozen."""
+    if getattr(sys, "frozen", False):
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            return Path(meipass)
     return Path(__file__).resolve().parents[2]
+
+
+def repo_root() -> Path:
+    """Repository or bundle root (for shipped static assets)."""
+    return install_root()
+
+
+def migrations_dir() -> Path:
+    return install_root() / "marrow" / "data" / "migrations"
 
 
 def bundled_foods_catalog_path() -> Path:
     """Pre-built offline food subset shipped with the app for dev/demo."""
-    return repo_root() / "marrow" / "data" / "processed" / "foods_catalog.sqlite"
+    return install_root() / "marrow" / "data" / "processed" / "foods_catalog.sqlite"
+
+
+def ui_dist_index() -> Path:
+    return install_root() / "ui" / "dist" / "index.html"
+
+
+def app_icon_path() -> Path | None:
+    """Windows .ico when present in the bundle."""
+    icon = install_root() / "assets" / "marrow.ico"
+    return icon if icon.is_file() else None
 
 
 def config_path() -> Path:

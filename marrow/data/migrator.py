@@ -5,12 +5,12 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
+from marrow.core.paths import migrations_dir
 
 
 def _migration_files() -> list[tuple[int, Path]]:
     files: list[tuple[int, Path]] = []
-    for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
+    for path in sorted(migrations_dir().glob("*.sql")):
         version = int(path.stem.split("_", 1)[0])
         files.append((version, path))
     return sorted(files, key=lambda t: t[0])

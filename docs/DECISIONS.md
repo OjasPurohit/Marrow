@@ -236,3 +236,31 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 ### Bridge
 
 - `get_user_settings`, `update_user_settings`, `list_backups`, `create_backup`, `restore_backup`, export/import JSON & CSV, `parse_food_photo`.
+
+## 2025-10-07 — M11 polish, PyInstaller & v1.0.0
+
+### Version **1.0.0**
+
+- Application version in `marrow.__version__`, `pyproject.toml`, Windows `version_info.txt`, and Settings → About.
+
+### Frozen bundle paths
+
+- `install_root()` resolves PyInstaller `_MEIPASS` or repo root in dev.
+- Migrations, bundled `foods_catalog.sqlite`, and `ui/dist` are shipped as PyInstaller `datas`; `migrator` reads SQL from `migrations_dir()` under `install_root()`.
+
+### Windows build
+
+- `scripts/marrow.spec` — one-file `Marrow.exe`, windowed, `assets/marrow.ico`, optional `assets/version_info.txt`.
+- `build.bat` / `scripts/build_release.py` — `npm run build` then PyInstaller.
+- Voice hotkey dependencies (`sounddevice`, `pynput`) remain optional extras for smaller default binary.
+
+### UI polish & accessibility
+
+- Shared `EmptyState` on Today, Foods, History, Trends, Night review.
+- Command palette entrance respects reduced motion (CSS + user `data-reduced-motion`).
+- `motionSpring()` helper for future motion.dev call sites; OS `prefers-reduced-motion` still handled in `global.css`.
+
+### README & release
+
+- Install/build docs, feature list, screenshot placeholders, data-source credits.
+- Git tag `v1.0.0` + GitHub Release with `Marrow.exe` when built on Windows CI/agent with upload permissions.
