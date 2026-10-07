@@ -21,11 +21,19 @@ describe('routes', () => {
 
   it('parses night review', () => {
     expect(parseRoute('#/night-review')).toBe('nightReview');
+    expect(parseRoute('#/night-review?date=2025-10-01')).toBe('nightReview');
+  });
+
+  it('parses history and trends', () => {
+    expect(parseRoute('#/history')).toBe('history');
+    expect(parseRoute('#/trends')).toBe('trends');
   });
 
   it('builds hrefs', () => {
     expect(routeHref('gallery')).toBe('#/gallery');
     expect(routeHref('nightReview')).toBe('#/night-review');
+    expect(routeHref('history')).toBe('#/history');
+    expect(routeHref('trends')).toBe('#/trends');
     expect(routeHref('foods')).toBe('#/foods');
     expect(routeHref('profile')).toBe('#/profile');
     expect(routeHref('home')).toBe('#/');

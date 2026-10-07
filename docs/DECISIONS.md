@@ -190,3 +190,23 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 ### Client
 
 - `marrow/services/groq_client.py` — urllib transport, timeouts, retry on 429/5xx; injectable transport for pytest.
+
+## 2025-10-07 — M9 history, trends & weight log
+
+### History
+
+- `marrow/services/diary_history.py` — range and month payloads with per-day macro totals (NULL rules from `diary_totals`), energy balance, `logged` / `data_incomplete` flags, streak counters.
+- UI `#/history` — month calendar heatmap (balance-colored), recent day list; day drill-down reuses `#/night-review?date=YYYY-MM-DD`.
+
+### Trends
+
+- `marrow/services/trends.py` — 7 / 30 / 90-day series for calories, protein, energy delta, rolling 7-day intake and balance averages, optional micronutrient keys (scaled panels via night-review helpers), weight points + smoothed line, ISO-week average balance with cumulative weekly balance.
+- UI `#/trends` — hand-built SVG `TrendLineSvg`, micronutrient chip picker (from profile targets), weight entry form and list.
+
+### Weight bridge
+
+- `delete_weight_entry`, `get_weight_log_with_trend` (7-day trailing moving average); existing `add_weight_entry` / `list_weight_entries` unchanged.
+
+### Bridge
+
+- `get_diary_history_range`, `get_diary_history_month`, `get_trend_series`.

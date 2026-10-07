@@ -33,6 +33,20 @@
       </button>
       <button
         type="button"
+        class:active={route === 'history'}
+        onclick={() => onNavigate?.('history')}
+      >
+        History
+      </button>
+      <button
+        type="button"
+        class:active={route === 'trends'}
+        onclick={() => onNavigate?.('trends')}
+      >
+        Trends
+      </button>
+      <button
+        type="button"
         class:active={route === 'foods'}
         onclick={() => onNavigate?.('foods')}
       >

@@ -31,7 +31,14 @@ from marrow.services.user_profile import (
 )
 from marrow.services.night_review import get_night_review
 from marrow.services.voice_input import capture_and_transcribe, get_last_voice_transcript
-from marrow.services.weight_log import add_weight_entry, list_weight_entries
+from marrow.services.diary_history import get_diary_history_month, get_diary_history_range
+from marrow.services.trends import get_trend_series
+from marrow.services.weight_log import (
+    add_weight_entry,
+    delete_weight_entry,
+    get_weight_log_with_trend,
+    list_weight_entries,
+)
 
 
 class BridgeApi:
@@ -154,6 +161,36 @@ class BridgeApi:
     def list_weight_entries(self, limit: int = 90) -> list:
         with session() as conn:
             return list_weight_entries(conn, limit=limit)
+
+    def get_weight_log_with_trend(self, limit: int = 90) -> dict:
+        with session() as conn:
+            return get_weight_log_with_trend(conn, limit=limit)
+
+    def delete_weight_entry(self, entry_id: int) -> dict:
+        with session() as conn:
+            return delete_weight_entry(conn, int(entry_id))
+
+    def get_diary_history_range(self, start_date: str | None = None, end_date: str | None = None) -> dict:
+        with session() as conn:
+            return get_diary_history_range(conn, start_date, end_date)
+
+    def get_diary_history_month(self, year: int, month: int) -> dict:
+        with session() as conn:
+            return get_diary_history_month(conn, int(year), int(month))
+
+    def get_trend_series(
+        self,
+        range_days: int = 30,
+        micronutrient_keys: list | None = None,
+        end_date: str | None = None,
+    ) -> dict:
+        with session() as conn:
+            return get_trend_series(
+                conn,
+                int(range_days),
+                micronutrient_keys=micronutrient_keys,
+                end_date=end_date,
+            )
 
     def get_groq_settings(self) -> dict:
         return groq_settings_public()

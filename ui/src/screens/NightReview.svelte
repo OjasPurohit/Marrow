@@ -6,11 +6,13 @@
   import MicroBarSvg from '@/components/MicroBarSvg.svelte';
   import NutrientRing from '@/components/NutrientRing.svelte';
   import { getNightReview, type NightReviewResponse } from '@/lib/nightReview';
+  import { parseHashQuery } from '@/lib/routes';
   import { formatKcal } from '@/lib/parseQuantity';
 
   let review: NightReviewResponse | null = $state(null);
   let error = $state<string | null>(null);
   let loading = $state(true);
+  let logDate = $state<string | undefined>(undefined);
 
   const microKeys = new Set([
     'fiber_g',
@@ -43,14 +45,25 @@
     return 'No verdict';
   }
 
-  onMount(async () => {
+  async function loadReview() {
+    loading = true;
+    error = null;
     try {
-      review = await getNightReview();
+      const params = parseHashQuery(location.hash);
+      logDate = params.get('date') ?? undefined;
+      review = await getNightReview(logDate);
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not load night review';
     } finally {
       loading = false;
     }
+  }
+
+  onMount(() => {
+    loadReview();
+    const onHash = () => loadReview();
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   });
 
   const macros = $derived(review?.macro_totals);
@@ -68,7 +81,7 @@
       <p class="text-caption">Night review</p>
       <h1 class="text-title-1">{review?.log_date ?? 'Today'}</h1>
     </div>
-    <a class="back text-caption" href="#/">← Today</a>
+    <a class="back text-caption" href={logDate ? '#/history' : '#/'}>← {logDate ? 'History' : 'Today'}</a>
   </header>
 
   {#if loading}
