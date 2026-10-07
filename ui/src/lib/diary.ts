@@ -95,6 +95,16 @@ export async function ensureDiaryBridge(): Promise<boolean> {
   return waitForBridge();
 }
 
+export async function parseFoodPhoto(
+  imageBase64: string,
+  mealTag = 'snack',
+  mimeType = 'image/jpeg',
+): Promise<ParseFoodTextResponse> {
+  const a = window.pywebview?.api;
+  if (!a) throw new Error('Photo logging requires the desktop app');
+  return (await a.parse_food_photo(imageBase64, mealTag, mimeType)) as ParseFoodTextResponse;
+}
+
 export async function parseFoodText(
   text: string,
   mealTag = 'snack',

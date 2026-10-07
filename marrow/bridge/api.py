@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from marrow.core.config import load_window_geometry, save_window_geometry
+from marrow.core.user_settings import save_user_settings, user_settings_public
 from marrow.core.groq_settings import (
     clear_groq_api_key,
     groq_settings_public,
@@ -39,6 +40,17 @@ from marrow.services.weight_log import (
     get_weight_log_with_trend,
     list_weight_entries,
 )
+from marrow.services.backup import (
+    create_backup_file,
+    export_diary_csv_text,
+    export_user_json_text,
+    import_diary_csv,
+    import_user_json,
+    list_backups,
+    restore_backup_file,
+)
+from marrow.services.data_sync_status import get_data_sync_status
+from marrow.services.groq_food_photo import parse_food_photo
 
 
 class BridgeApi:
@@ -60,6 +72,16 @@ class BridgeApi:
     def get_catalog_seed_status(self) -> dict:
         with session() as conn:
             return catalog_seed_status(conn)
+
+    def get_data_sync_status(self) -> dict:
+        with session() as conn:
+            return get_data_sync_status(conn)
+
+    def get_user_settings(self) -> dict:
+        return user_settings_public()
+
+    def update_user_settings(self, payload: dict) -> dict:
+        return save_user_settings(payload)
 
     def search_foods(self, query: str, limit: int = 25) -> dict:
         with session() as conn:
@@ -117,6 +139,10 @@ class BridgeApi:
     def parse_food_text(self, text: str, meal_tag: str = "snack") -> dict:
         with session() as conn:
             return parse_food_text(conn, text, meal_tag=meal_tag)
+
+    def parse_food_photo(self, image_base64: str, meal_tag: str = "snack", mime_type: str = "image/jpeg") -> dict:
+        with session() as conn:
+            return parse_food_photo(conn, image_base64, mime_type=mime_type, meal_tag=meal_tag)
 
     def confirm_and_save_log(self, payload: dict) -> dict:
         with session() as conn:
@@ -198,11 +224,13 @@ class BridgeApi:
     def update_groq_settings(self, payload: dict) -> dict:
         allowed = {
             "chat_model",
+            "vision_model",
             "whisper_model",
             "request_timeout_sec",
             "max_retries",
             "enable_night_summary",
             "enable_voice_hotkey",
+            "enable_photo_parse",
             "voice_hotkey",
             "voice_record_seconds",
         }
@@ -226,3 +254,31 @@ class BridgeApi:
 
     def poll_voice_transcript(self, clear: bool = True) -> dict:
         return get_last_voice_transcript(clear=bool(clear))
+
+    def list_backups(self) -> list:
+        return list_backups()
+
+    def create_backup(self) -> dict:
+        return create_backup_file()
+
+    def restore_backup(self, filename: str) -> dict:
+        return restore_backup_file(filename)
+
+    def export_user_data_json(self) -> str:
+        with session() as conn:
+            return export_user_json_text(conn)
+
+    def export_diary_csv(self) -> str:
+        with session() as conn:
+            return export_diary_csv_text(conn)
+
+    def import_user_data_json(self, json_text: str) -> dict:
+        import json as _json
+
+        data = _json.loads(json_text)
+        with session() as conn:
+            return import_user_json(conn, data)
+
+    def import_diary_csv(self, csv_text: str) -> dict:
+        with session() as conn:
+            return import_diary_csv(conn, csv_text)

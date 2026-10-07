@@ -54,16 +54,20 @@ class GroqClient:
 
     def chat_completion(
         self,
-        messages: list[dict[str, str]],
+        messages: list[dict[str, Any]],
         *,
         model: str | None = None,
         temperature: float = 0.0,
         response_format: dict[str, str] | None = None,
+        vision: bool = False,
     ) -> str:
         if not self._api_key:
             raise GroqClientError("Groq API key not configured", retryable=False)
+        chosen = model or (
+            self._settings["vision_model"] if vision else self._settings["chat_model"]
+        )
         body: dict[str, Any] = {
-            "model": model or self._settings["chat_model"],
+            "model": chosen,
             "messages": messages,
             "temperature": temperature,
         }

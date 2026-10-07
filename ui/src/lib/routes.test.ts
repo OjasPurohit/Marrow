@@ -19,6 +19,10 @@ describe('routes', () => {
     expect(parseRoute('#/profile')).toBe('profile');
   });
 
+  it('parses settings', () => {
+    expect(parseRoute('#/settings')).toBe('settings');
+  });
+
   it('parses night review', () => {
     expect(parseRoute('#/night-review')).toBe('nightReview');
     expect(parseRoute('#/night-review?date=2025-10-01')).toBe('nightReview');
@@ -36,6 +40,7 @@ describe('routes', () => {
     expect(routeHref('trends')).toBe('#/trends');
     expect(routeHref('foods')).toBe('#/foods');
     expect(routeHref('profile')).toBe('#/profile');
+    expect(routeHref('settings')).toBe('#/settings');
     expect(routeHref('home')).toBe('#/');
   });
 });

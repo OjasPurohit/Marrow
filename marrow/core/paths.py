@@ -46,5 +46,11 @@ def config_path() -> Path:
     return app_data_dir() / "config.json"
 
 
+def backups_dir() -> Path:
+    path = app_data_dir() / "backups"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def default_window_geometry() -> dict[str, int]:
     return {"x": 100, "y": 100, "width": 1200, "height": 800}

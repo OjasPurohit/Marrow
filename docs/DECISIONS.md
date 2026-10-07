@@ -210,3 +210,29 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 ### Bridge
 
 - `get_diary_history_range`, `get_diary_history_month`, `get_trend_series`.
+
+## 2025-10-07 — M10 settings, backup, palette & photo log
+
+### Settings (`#/settings`)
+
+- UI preferences in `config.json` → `ui` (`theme`, `units`, `ui_scale`, accessibility flags); applied via `data-*` attributes on `<html>` and design tokens in `tokens.css`.
+- Groq non-secret options extended with `vision_model` and `enable_photo_parse`; API key remains keyring-only.
+- Data-source panel uses `get_data_sync_status` — honest about bundled catalog subset vs future full sync.
+
+### Backup / export
+
+- Rotating file copies under `{AppData}/backups/` (max 7, at most one automatic backup per calendar day on DB connect).
+- Manual JSON export/import (`marrow-backup` v1, SHA-256 checksum) for profile, targets, diary, weight, custom foods, recipes.
+- Diary CSV export/import for spreadsheet workflows.
+
+### Command palette & shortcuts
+
+- `Ctrl+K` — search foods, navigate, quick log; `Ctrl+L` — focus Today log; voice hotkey documented in Settings.
+
+### Photo logging (optional)
+
+- `parse_food_photo` — Groq vision JSON → same confirmation flow as text; all matches forced `ESTIMATED` with `photo_estimate` warning.
+
+### Bridge
+
+- `get_user_settings`, `update_user_settings`, `list_backups`, `create_backup`, `restore_backup`, export/import JSON & CSV, `parse_food_photo`.

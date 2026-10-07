@@ -2,6 +2,7 @@ export type Route =
   | 'home'
   | 'foods'
   | 'profile'
+  | 'settings'
   | 'nightReview'
   | 'history'
   | 'trends'
@@ -16,6 +17,7 @@ export function parseRoute(hash: string): Route {
   if (path.startsWith('/trends')) return 'trends';
   if (path.startsWith('/foods')) return 'foods';
   if (path.startsWith('/profile')) return 'profile';
+  if (path.startsWith('/settings')) return 'settings';
   return 'home';
 }
 
@@ -31,6 +33,7 @@ export function routeHref(route: Route): string {
   if (route === 'trends') return '#/trends';
   if (route === 'foods') return '#/foods';
   if (route === 'profile') return '#/profile';
+  if (route === 'settings') return '#/settings';
   return '#/';
 }
 

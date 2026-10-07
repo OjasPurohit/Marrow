@@ -6,6 +6,7 @@
     searchFoods,
     type FoodSearchResult,
   } from '@/lib/foods';
+  import { parseHashQuery } from '@/lib/routes';
 
   let query = $state('');
   let results = $state<FoodSearchResult[]>([]);
@@ -32,7 +33,13 @@
 
   onMount(async () => {
     bridgeReady = await ensureFoodBridge();
-    await runSearch('ban');
+    const q = parseHashQuery(location.hash).get('q');
+    if (q) {
+      query = q;
+      await runSearch(q);
+    } else {
+      await runSearch('ban');
+    }
   });
 </script>
 

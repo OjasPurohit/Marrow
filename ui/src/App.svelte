@@ -8,13 +8,18 @@
   import NightReview from '@/screens/NightReview.svelte';
   import History from '@/screens/History.svelte';
   import Trends from '@/screens/Trends.svelte';
+  import Settings from '@/screens/Settings.svelte';
   import Onboarding from '@/screens/Onboarding.svelte';
   import Gallery from '@/screens/gallery/Gallery.svelte';
+  import CommandPalette from '@/components/CommandPalette.svelte';
+  import { applyUserSettings } from '@/lib/applyPreferences';
   import { ensureProfileBridge, getUserProfile } from '@/lib/profile';
+  import { ensureSettingsBridge, getUserSettings } from '@/lib/settings';
 
   let route: Route = $state('home');
   let showOnboarding = $state(false);
   let profileChecked = $state(false);
+  let paletteOpen = $state(false);
 
   function syncRoute() {
     route = parseRoute(location.hash);
@@ -27,7 +32,15 @@
     else if (next === 'nightReview') location.hash = '/night-review';
     else if (next === 'history') location.hash = '/history';
     else if (next === 'trends') location.hash = '/trends';
+    else if (next === 'settings') location.hash = '/settings';
     else location.hash = '/';
+  }
+
+  function openQuickLog() {
+    navigate('home');
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('marrow-focus-quick-log'));
+    });
   }
 
   async function refreshProfileGate() {
@@ -41,10 +54,33 @@
     syncRoute();
     window.addEventListener('hashchange', syncRoute);
     refreshProfileGate();
-    return () => window.removeEventListener('hashchange', syncRoute);
+    void ensureSettingsBridge().then(async () => {
+      applyUserSettings(await getUserSettings());
+    });
+    const onKeys = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        paletteOpen = !paletteOpen;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'l') {
+        event.preventDefault();
+        openQuickLog();
+      }
+    };
+    window.addEventListener('keydown', onKeys);
+    return () => {
+      window.removeEventListener('hashchange', syncRoute);
+      window.removeEventListener('keydown', onKeys);
+    };
   });
 </script>
 
+<CommandPalette
+  open={paletteOpen}
+  onClose={() => (paletteOpen = false)}
+  onNavigate={navigate}
+  onQuickLog={openQuickLog}
+/>
 <Chrome {route} onNavigate={navigate} />
 {#if showOnboarding}
   <Onboarding
@@ -59,6 +95,8 @@
   <Foods />
 {:else if route === 'profile'}
   <Profile />
+{:else if route === 'settings'}
+  <Settings />
 {:else if route === 'nightReview' && profileChecked}
   <NightReview />
 {:else if route === 'history' && profileChecked}

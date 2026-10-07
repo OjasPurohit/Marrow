@@ -15,6 +15,7 @@ KEYRING_ACCOUNT = "groq_api_key"
 
 DEFAULT_GROQ_SETTINGS: dict[str, Any] = {
     "chat_model": "llama-3.3-70b-versatile",
+    "vision_model": "llama-3.2-11b-vision-preview",
     "whisper_model": "whisper-large-v3",
     "request_timeout_sec": 30.0,
     "max_retries": 2,
@@ -22,6 +23,7 @@ DEFAULT_GROQ_SETTINGS: dict[str, Any] = {
     "enable_voice_hotkey": True,
     "voice_hotkey": "ctrl+shift+v",
     "voice_record_seconds": 8.0,
+    "enable_photo_parse": True,
 }
 
 

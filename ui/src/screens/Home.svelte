@@ -9,6 +9,7 @@
     ensureDiaryBridge,
     listDiaryEntriesForDate,
     parseFoodText,
+    parseFoodPhoto,
     searchFoodsForSwap,
     swapDraftFood,
     type DiaryDayResponse,
@@ -28,6 +29,8 @@
   let swapDraftId: string | null = $state(null);
   let swapQuery = $state('');
   let swapResults: FoodSearchResult[] = $state([]);
+  let logInputEl: HTMLInputElement | null = $state(null);
+  let photoParsing = $state(false);
 
   const mealOptions = [
     'breakfast',
@@ -63,8 +66,45 @@
       }
     };
     window.addEventListener('marrow-voice-transcript', onVoice);
-    return () => window.removeEventListener('marrow-voice-transcript', onVoice);
+    const onFocusLog = () => {
+      logInputEl?.focus();
+      logInputEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    window.addEventListener('marrow-focus-quick-log', onFocusLog);
+    return () => {
+      window.removeEventListener('marrow-voice-transcript', onVoice);
+      window.removeEventListener('marrow-focus-quick-log', onFocusLog);
+    };
   });
+
+  async function handlePhotoPick(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    error = null;
+    photoParsing = true;
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const result = await parseFoodPhoto(dataUrl, mealTag, file.type || 'image/jpeg');
+      if (result.meal_tag) mealTag = result.meal_tag;
+      drafts = result.items.map((item) => ({ ...item, match_confidence: 'ESTIMATED' }));
+      showConfirm = drafts.length > 0;
+      logText = '[meal photo]';
+      if (!drafts.length) {
+        error = 'Could not suggest foods from this photo — try text log or a clearer image.';
+      }
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Photo parse failed';
+    } finally {
+      photoParsing = false;
+      input.value = '';
+    }
+  }
 
   async function handleParse() {
     error = null;
@@ -198,8 +238,13 @@
           type="text"
           placeholder="e.g. 2 roti, 1 katori dal, 1 medium banana"
           bind:value={logText}
+          bind:this={logInputEl}
           onkeydown={(e) => e.key === 'Enter' && handleParse()}
         />
+      </label>
+      <label class="photo-btn text-caption">
+        <input type="file" accept="image/*" capture="environment" hidden onchange={handlePhotoPick} />
+        {photoParsing ? 'Photo…' : 'Photo'}
       </label>
       <Button variant="primary" disabled={parsing || !logText.trim()} onclick={handleParse}>
         {parsing ? 'Parsing…' : 'Parse'}
@@ -462,6 +507,16 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+  }
+
+  .photo-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    cursor: pointer;
+    color: var(--color-text-secondary);
   }
 
   .field.grow {

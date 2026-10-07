@@ -59,6 +59,13 @@
       >
         Profile
       </button>
+      <button
+        type="button"
+        class:active={route === 'settings'}
+        onclick={() => onNavigate?.('settings')}
+      >
+        Settings
+      </button>
       {#if dev}
         <button
           type="button"
