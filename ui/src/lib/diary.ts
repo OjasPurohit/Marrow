@@ -34,10 +34,19 @@ export type DiaryNutrients = {
   fat_g: number | null;
 };
 
+export type EnergyBalance = {
+  status: 'DEFICIT' | 'ON_TARGET' | 'SURPLUS' | null;
+  energy_delta_kcal: number | null;
+  tolerance_pct: number;
+  tolerance_kcal: number | null;
+  target_day_kind?: string;
+};
+
 export type DiaryTotals = DiaryNutrients & {
   entry_count: number;
   targets: Record<string, number>;
   remaining: DiaryNutrients;
+  energy_balance?: EnergyBalance;
 };
 
 export type DiaryMealSection = {

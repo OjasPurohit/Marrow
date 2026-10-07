@@ -6,6 +6,7 @@ from marrow.services.diary_totals import (
     remaining_budget,
     summarize_diary_nutrients,
 )
+from marrow.services.user_profile import complete_onboarding, resolve_daily_macro_targets
 
 
 def test_summarize_all_known():
@@ -65,6 +66,20 @@ def test_list_day_includes_macros(user_db):
     from marrow.services.diary_log import confirm_and_save_log, list_diary_entries_for_date
     from marrow.services.diary_parse import parse_food_text
 
+    complete_onboarding(
+        user_db,
+        {
+            "age_years": 30,
+            "sex": "female",
+            "height_cm": 165.0,
+            "weight_kg": 60.0,
+            "activity_level": "light",
+            "goal": "maintain",
+            "disclaimer_acknowledged": True,
+        },
+    )
+    expected_kcal = resolve_daily_macro_targets(user_db)["energy_kcal"]
+
     parsed = parse_food_text(user_db, "2 roti", meal_tag="lunch")
     item = parsed["items"][0]
     confirm_and_save_log(
@@ -84,6 +99,6 @@ def test_list_day_includes_macros(user_db):
     )
     day = list_diary_entries_for_date(user_db)
     assert day["totals"]["protein_g"] is not None
-    assert day["totals"]["targets"]["energy_kcal"] == PLACEHOLDER_DAILY_TARGETS["energy_kcal"]
+    assert day["totals"]["targets"]["energy_kcal"] == expected_kcal
     assert len(day["meals"]) == 1
     assert day["meals"][0]["meal_tag"] == "lunch"

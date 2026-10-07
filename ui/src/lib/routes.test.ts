@@ -15,9 +15,14 @@ describe('routes', () => {
     expect(parseRoute('#/foods')).toBe('foods');
   });
 
+  it('parses profile', () => {
+    expect(parseRoute('#/profile')).toBe('profile');
+  });
+
   it('builds hrefs', () => {
     expect(routeHref('gallery')).toBe('#/gallery');
     expect(routeHref('foods')).toBe('#/foods');
+    expect(routeHref('profile')).toBe('#/profile');
     expect(routeHref('home')).toBe('#/');
   });
 });

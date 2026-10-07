@@ -87,7 +87,8 @@ tests/            pytest
 | **M3** Food search | Done | FTS5 search, serving conversion, custom foods & recipes |
 | **M4** NL parser & diary | Done | Rule-based parse, confirmation UI, diary schema |
 | **M5** Today & totals | Done | Rings/bars, meal groups, timeline, daily aggregation |
-| **M6+** Goals, charts, sync | Planned | Real targets/onboarding; see project spec |
+| **M6** Goals & onboarding | Done | Mifflin-St Jeor, DB targets, deficit/surplus, weight log |
+| **M7+** Charts, sync | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).
 

@@ -1,4 +1,4 @@
-"""Daily diary nutrient aggregation and placeholder targets (M5)."""
+"""Daily diary nutrient aggregation (M5); targets resolved in user_profile (M6)."""
 
 from __future__ import annotations
 

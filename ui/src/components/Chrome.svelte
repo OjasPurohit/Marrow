@@ -31,6 +31,13 @@
       >
         Foods
       </button>
+      <button
+        type="button"
+        class:active={route === 'profile'}
+        onclick={() => onNavigate?.('profile')}
+      >
+        Profile
+      </button>
       {#if dev}
         <button
           type="button"

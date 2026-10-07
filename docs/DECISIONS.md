@@ -118,3 +118,28 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 ### Today UI
 
 - Hand-built SVG `NutrientRing` + `MacroBar` components using design tokens (no chart library).
+
+## 2025-10-07 — M6 onboarding, targets & energy balance
+
+### Metabolism
+
+- **Mifflin-St Jeor** BMR in `marrow/services/metabolism.py`; TDEE = BMR × activity multiplier.
+- Goals adjust TDEE: cut −400 kcal, maintain 0, lean bulk +250 kcal; **minimum intake guardrails** 1200 (female) / 1500 (male) with user-visible warnings.
+- Default macro split: protein g/kg by goal, fat ~0.8 g/kg floor, remainder carbs.
+
+### Schema (migration `006_profile_targets.sql`)
+
+- Extended `user_profile` (demographics, goal, tolerance %, optional gym weekdays JSON).
+- `daily_macro_targets` rows: `default`, `gym` (+200 kcal suggestion), `rest`.
+- `micronutrient_targets` seeded from adult RDA defaults (`rda_defaults.py`), editable on save.
+- `weight_log` for body-weight entries (trend UI deferred to M9).
+
+### Daily status
+
+- `classify_energy_balance` → `DEFICIT` | `ON_TARGET` | `SURPLUS` vs resolved day target; symmetric ±`calorie_tolerance_pct` band (default 5%).
+- Today totals include `energy_balance` and DB-backed `targets` (placeholders only before onboarding completes).
+
+### UI
+
+- First-launch **onboarding** overlay (editable suggested macros, disclaimer acknowledgement).
+- **Profile** nav route (`#/profile`) for read-only target summary until M10 settings.

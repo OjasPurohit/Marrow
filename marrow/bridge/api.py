@@ -17,6 +17,13 @@ from marrow.services.diary_log import (
 )
 from marrow.services.diary_parse import parse_food_text
 from marrow.services.recipes import create_recipe, get_recipe
+from marrow.services.user_profile import (
+    complete_onboarding,
+    get_user_profile,
+    preview_metabolic_plan,
+    update_macro_targets,
+)
+from marrow.services.weight_log import add_weight_entry, list_weight_entries
 
 
 class BridgeApi:
@@ -107,3 +114,31 @@ class BridgeApi:
     def get_daily_nutrient_totals(self, log_date: str | None = None) -> dict:
         with session() as conn:
             return get_daily_nutrient_totals(conn, log_date)
+
+    def get_user_profile(self) -> dict:
+        with session() as conn:
+            return get_user_profile(conn)
+
+    def preview_metabolic_plan(self, payload: dict) -> dict:
+        return preview_metabolic_plan(payload)
+
+    def complete_onboarding(self, payload: dict) -> dict:
+        with session() as conn:
+            return complete_onboarding(conn, payload)
+
+    def update_macro_targets(self, payload: dict) -> dict:
+        with session() as conn:
+            return update_macro_targets(conn, payload)
+
+    def add_weight_entry(self, payload: dict) -> dict:
+        with session() as conn:
+            return add_weight_entry(
+                conn,
+                float(payload["weight_kg"]),
+                logged_date=payload.get("logged_date"),
+                note=payload.get("note"),
+            )
+
+    def list_weight_entries(self, limit: int = 90) -> list:
+        with session() as conn:
+            return list_weight_entries(conn, limit=limit)

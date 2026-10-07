@@ -149,6 +149,14 @@
   const totals = $derived(day?.totals);
   const targets = $derived(totals?.targets ?? {});
   const remaining = $derived(totals?.remaining);
+  const balance = $derived(totals?.energy_balance);
+
+  function balanceLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    if (status === 'ON_TARGET') return 'On target';
+    if (status === 'DEFICIT') return 'Deficit';
+    return 'Surplus';
+  }
 </script>
 
 <main class="home">
@@ -253,7 +261,19 @@
     <section class="summary">
       <div class="summary-head">
         <h2 class="text-title-2">Running totals</h2>
-        <p class="text-caption budget-note">Budget targets are placeholders until goals onboarding (M6).</p>
+        {#if balance?.status}
+          <p class="text-caption budget-note status-{balance.status}">
+            {balanceLabel(balance.status)}
+            {#if balance.energy_delta_kcal != null}
+              · {balance.energy_delta_kcal > 0 ? '+' : ''}{Math.round(balance.energy_delta_kcal)} kcal vs target
+            {/if}
+            {#if balance.target_day_kind && balance.target_day_kind !== 'default'}
+              · {balance.target_day_kind} day
+            {/if}
+          </p>
+        {:else}
+          <p class="text-caption budget-note">Log food to see deficit / surplus vs your targets.</p>
+        {/if}
       </div>
       <div class="rings-row">
         <NutrientRing
@@ -530,6 +550,18 @@
   .budget-note {
     margin: var(--space-1) 0 0;
     color: var(--color-text-tertiary);
+  }
+
+  .status-DEFICIT {
+    color: var(--color-warning);
+  }
+
+  .status-SURPLUS {
+    color: var(--color-accent);
+  }
+
+  .status-ON_TARGET {
+    color: var(--color-success);
   }
 
   .rings-row {

@@ -8,10 +8,13 @@ from datetime import date
 from marrow.services.food_detail import convert_food_serving
 from marrow.services.food_repository import fetch_food_row
 from marrow.services.diary_totals import (
-    PLACEHOLDER_DAILY_TARGETS,
     group_entries_by_meal,
     remaining_budget,
     summarize_diary_nutrients,
+)
+from marrow.services.user_profile import (
+    energy_status_for_day,
+    resolve_daily_macro_targets,
 )
 from marrow.services.nutrient_validation import collect_nutrient_warnings, nutrients_for_display
 
@@ -109,7 +112,7 @@ def confirm_and_save_log(conn: sqlite3.Connection, payload: dict) -> dict:
         )
 
     conn.commit()
-    totals = _totals_payload(saved)
+    totals = _totals_payload(conn, saved, log_date)
     return {
         "log_id": log_id,
         "log_date": log_date,
@@ -119,13 +122,19 @@ def confirm_and_save_log(conn: sqlite3.Connection, payload: dict) -> dict:
     }
 
 
-def _totals_payload(entries: list[dict]) -> dict:
+def _totals_payload(
+    conn: sqlite3.Connection,
+    entries: list[dict],
+    log_date: str,
+) -> dict:
     nutrients = summarize_diary_nutrients(entries)
+    targets = resolve_daily_macro_targets(conn, log_date)
     return {
         **nutrients,
         "entry_count": len(entries),
-        "targets": dict(PLACEHOLDER_DAILY_TARGETS),
-        "remaining": remaining_budget(nutrients),
+        "targets": targets,
+        "remaining": remaining_budget(nutrients, targets),
+        "energy_balance": energy_status_for_day(conn, nutrients, log_date),
     }
 
 
@@ -203,11 +212,13 @@ def list_diary_entries_for_date(
         )
 
     nutrients = summarize_diary_nutrients(entries)
+    targets = resolve_daily_macro_targets(conn, day)
     totals = {
         **nutrients,
         "entry_count": len(entries),
-        "targets": dict(PLACEHOLDER_DAILY_TARGETS),
-        "remaining": remaining_budget(nutrients),
+        "targets": targets,
+        "remaining": remaining_budget(nutrients, targets),
+        "energy_balance": energy_status_for_day(conn, nutrients, day),
     }
     meals = group_entries_by_meal(entries)
 
