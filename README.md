@@ -85,7 +85,7 @@ tests/            pytest
 | **M1b** Design lab | Done | Dev-only component gallery + interaction lab (`#/gallery`) |
 | **M2** Food ingestion | Done | Unified schema, ingest pipeline, bundled catalog subset |
 | **M3** Food search | Done | FTS5 search, serving conversion, custom foods & recipes |
-| **M4** Diary | Planned | Logging, portions, daily totals |
+| **M4** NL parser & diary | Done | Rule-based parse, confirmation UI, diary schema |
 | **M4+** Goals, charts, sync | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).

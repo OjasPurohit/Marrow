@@ -76,3 +76,25 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 - `source='custom'` on `foods` for user entries (per 100g / 100ml nutrients).
 - `recipes` + `recipe_ingredients`; per-serving nutrients computed by summing scaled ingredient macros.
 - `food_favorites` and `food_recents` tables (write paths in M4 diary).
+
+## 2025-10-07 — M4 natural-language log parser & confirmation
+
+### Parser pipeline
+
+1. **Local rule-based parser** (`marrow/services/food_text_parser.py`) — quantities (fractions, “2 and a half”, Hindi number words), units (g, katori, roti, …), Hinglish food aliases → FTS5 match.
+2. **Groq slot** (`marrow/services/diary_parse.py`) — runs only when `GROQ_API_KEY` is set **and** local parse finds no foods; implementation deferred to **M8** (hook present, no network calls in M4).
+3. **Confirmation UI** on Today (`#/`) before any diary write.
+
+### Diary schema (migration `004_diary.sql`)
+
+- `diary_logs` — `log_date`, `meal_tag` (`breakfast` | `lunch` | `dinner` | `snack`), optional `source_text`.
+- `diary_log_entries` — portion, scaled macros (nullable), `match_confidence` (`EXACT` | `GOOD` | `ESTIMATED`).
+
+### Bridge
+
+- `parse_food_text`, `confirm_and_save_log`, `list_diary_entries_for_date`.
+
+### Accuracy at confirmation
+
+- Macro–kcal consistency warning (~10% tolerance) via `nutrient_validation.py`.
+- Portion / per-item kcal sanity warnings; `NULL` nutrients stay `null` end-to-end (never coerced to 0 in API or UI display helpers).
