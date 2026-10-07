@@ -7,6 +7,7 @@
   }
 
   let { route, onNavigate }: Props = $props();
+  const dev = import.meta.env.DEV;
 </script>
 
 <header class="chrome">
@@ -16,9 +17,22 @@
       <span class="text-headline">Marrow</span>
     </div>
     <nav class="nav" aria-label="Main">
-      <button type="button" class:active={route === 'home'} onclick={() => onNavigate?.('home')}>
+      <button
+        type="button"
+        class:active={route === 'home'}
+        onclick={() => onNavigate?.('home')}
+      >
         Today
       </button>
+      {#if dev}
+        <button
+          type="button"
+          class:active={route === 'gallery'}
+          onclick={() => onNavigate?.('gallery')}
+        >
+          Lab
+        </button>
+      {/if}
     </nav>
   </div>
 </header>

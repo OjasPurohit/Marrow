@@ -66,7 +66,7 @@ tests/            pytest
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | **M1** Scaffold | Done | pywebview shell, bridge, SQLite migrations, Svelte UI tokens |
-| **M1b** Design lab | Planned | Dev-only component gallery + interaction lab |
+| **M1b** Design lab | Done | Dev-only component gallery + interaction lab (`#/gallery`) |
 | **M2** Food ingestion | Planned | USDA / Open Food Facts pipeline, search UI |
 | **M3** Diary & meals | Planned | Logging, portions, daily totals |
 | **M4+** Goals, charts, sync | Planned | See project spec |
