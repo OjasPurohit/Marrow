@@ -243,9 +243,6 @@
     }
   }
 
-</style>
-
-<style>
   :global(html[data-reduced-motion='true']) .backdrop,
   :global(html[data-reduced-motion='true']) .palette {
     animation: none !important;
