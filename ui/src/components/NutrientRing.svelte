@@ -18,8 +18,8 @@
   }: Props = $props();
 
   const stroke = 8;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
+  const radius = $derived((size - stroke) / 2);
+  const circumference = $derived(2 * Math.PI * radius);
 
   const progress = $derived(
     value === null || target <= 0 ? 0 : Math.min(1, value / target),
