@@ -7,10 +7,13 @@ import sqlite3
 from datetime import UTC, date, datetime
 from typing import Any
 
+from marrow.services.diary_totals import PLACEHOLDER_DAILY_TARGETS
 from marrow.services.energy_status import classify_energy_balance
 from marrow.services.metabolism import (
+    GYM_DAY_EXTRA_KCAL,
     MEDICAL_DISCLAIMER,
     compute_metabolic_plan,
+    suggest_macro_targets,
 )
 from marrow.services.rda_defaults import default_micronutrient_targets
 
@@ -152,6 +155,38 @@ def _seed_micronutrient_defaults(conn: sqlite3.Connection, sex: str) -> None:
             """,
             (key, item["target_value"], item["unit"]),
         )
+
+
+def quick_start_tracking(conn: sqlite3.Connection) -> dict:
+    """Skip demographics wizard — use neutral defaults and start meal logging."""
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    conn.execute(
+        """
+        UPDATE user_profile SET
+            goal = 'maintain',
+            activity_level = 'moderate',
+            calorie_tolerance_pct = 5.0,
+            use_split_day_targets = 0,
+            gym_weekdays = NULL,
+            disclaimer_acknowledged_at = ?,
+            onboarding_completed_at = ?,
+            updated_at = datetime('now')
+        WHERE id = 1
+        """,
+        (now, now),
+    )
+
+    default = dict(PLACEHOLDER_DAILY_TARGETS)
+    gym_energy = float(default["energy_kcal"]) + GYM_DAY_EXTRA_KCAL
+    gym = suggest_macro_targets(gym_energy, weight_kg=70.0, goal="maintain")
+
+    _upsert_macro_targets(conn, "default", default)
+    _upsert_macro_targets(conn, "gym", gym)
+    _upsert_macro_targets(conn, "rest", default)
+    _seed_micronutrient_defaults(conn, "male")
+
+    conn.commit()
+    return get_user_profile(conn)
 
 
 def complete_onboarding(conn: sqlite3.Connection, payload: dict) -> dict:

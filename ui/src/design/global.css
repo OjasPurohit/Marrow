@@ -39,6 +39,31 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--color-text);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+select {
+  color-scheme: dark;
+  padding: var(--space-2) var(--space-3);
+  max-width: 100%;
+}
+
+select option {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text);
+}
+
+html[data-theme='light'] select {
+  color-scheme: light;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

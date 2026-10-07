@@ -6,6 +6,7 @@ from marrow.services.diary_log import list_diary_entries_for_date
 from marrow.services.user_profile import (
     complete_onboarding,
     get_user_profile,
+    quick_start_tracking,
     resolve_daily_macro_targets,
     resolve_day_kind,
 )
@@ -53,3 +54,10 @@ def test_diary_uses_db_targets_after_onboarding(user_db):
 def test_get_profile_before_onboarding(user_db):
     profile = get_user_profile(user_db)
     assert not profile["onboarding_completed"]
+
+
+def test_quick_start_skips_demographics_wizard(user_db):
+    profile = quick_start_tracking(user_db)
+    assert profile["onboarding_completed"]
+    assert profile["macro_targets"]["default"]["energy_kcal"] == 2200.0
+    assert get_user_profile(user_db)["onboarding_completed"]

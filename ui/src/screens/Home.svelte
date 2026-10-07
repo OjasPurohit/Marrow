@@ -18,6 +18,8 @@
   } from '@/lib/diary';
   import { confidenceLabel, formatAmount, formatGrams, formatKcal } from '@/lib/parseQuantity';
   import type { FoodSearchResult } from '@/lib/foods';
+  import { ensureWeeklyBridge, getWeeklyNutritionAverage, type WeeklyNutritionAverage } from '@/lib/weekly';
+  import { ensureNightReviewBridge, getNightReview, type NightReviewResponse } from '@/lib/nightReview';
 
   let logText = $state('');
   let mealTag = $state('lunch');
@@ -32,6 +34,8 @@
   let swapResults: FoodSearchResult[] = $state([]);
   let logInputEl: HTMLInputElement | null = $state(null);
   let photoParsing = $state(false);
+  let weekly: WeeklyNutritionAverage | null = $state(null);
+  let todayReview: NightReviewResponse | null = $state(null);
 
   const mealOptions = [
     'breakfast',
@@ -54,6 +58,10 @@
 
   async function refreshToday() {
     day = await listDiaryEntriesForDate();
+    await ensureWeeklyBridge();
+    weekly = await getWeeklyNutritionAverage();
+    await ensureNightReviewBridge();
+    todayReview = await getNightReview();
   }
 
   onMount(async () => {
@@ -211,19 +219,30 @@
     if (status === 'DEFICIT') return 'Deficit';
     return 'Surplus';
   }
+
+  const todayMicros = $derived(
+    todayReview?.nutrients?.filter((n) =>
+      ['fiber_g', 'iron_mg', 'calcium_mg', 'vitamin_d_ug', 'sodium_mg'].includes(n.key),
+    ) ?? [],
+  );
+
+  function microDisplay(row: { consumed: number | null; unit: string }): string {
+    if (row.consumed == null) return '—';
+    return `${Math.round(row.consumed * 10) / 10} ${row.unit}`;
+  }
 </script>
 
 <main class="home">
   <div class="hero">
     <p class="text-overline">Today</p>
-    <h1 class="text-display">Eat with intention.</h1>
+    <h1 class="text-display">Log each meal.</h1>
     <p class="text-body lede">
-      Type what you ate — quantities, roti, katori, Hinglish works. Review before it hits your diary.
+      Type what you ate after every meal — we parse it, you confirm once, and your day’s nutrition adds up below.
     </p>
-    <a class="night-link text-caption" href="#/night-review">Open night review →</a>
+    <a class="night-link text-caption" href="#/night-review">Full day review (macros + micros) →</a>
   </div>
 
-  <Card title="Quick log" subtitle="Parse → confirm → save">
+  <Card title="Quick log" subtitle="Type a meal → confirm → save">
     <div class="log-form">
       <label class="field">
         <span class="text-caption">Meal</span>
@@ -329,10 +348,40 @@
     </Card>
   {/if}
 
+  {#if weekly}
+    <section class="weekly-block">
+      <h2 class="text-title-2">Weekly average</h2>
+      {#if weekly.eligible}
+        <p class="text-caption">
+          Last {weekly.window_days} days ({weekly.start_date} → {weekly.end_date}) — daily average while you logged every day.
+        </p>
+        <div class="weekly-macros">
+          <span>{formatKcal(weekly.macros_avg.energy_kcal)} kcal</span>
+          <span>{formatGrams(weekly.macros_avg.protein_g)} protein</span>
+          <span>{formatGrams(weekly.macros_avg.carbs_g)} carbs</span>
+          <span>{formatGrams(weekly.macros_avg.fat_g)} fat</span>
+        </div>
+        <ul class="weekly-micros text-caption">
+          {#each Object.entries(weekly.micros_avg) as [key, value]}
+            <li>
+              {weekly.micro_labels[key] ?? key}:
+              {value != null ? Math.round(value * 10) / 10 : '—'}
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <p class="text-caption progress">
+          Log meals on <strong>{weekly.days_remaining}</strong> more day{weekly.days_remaining === 1 ? '' : 's'} this
+          week ({weekly.days_logged}/{weekly.window_days} so far) to unlock your weekly macro & micro average.
+        </p>
+      {/if}
+    </section>
+  {/if}
+
   {#if totals}
     <section class="summary">
       <div class="summary-head">
-        <h2 class="text-title-2">Running totals</h2>
+        <h2 class="text-title-2">Today’s totals</h2>
         {#if balance?.status}
           <p class="text-caption budget-note status-{balance.status}">
             {balanceLabel(balance.status)}
@@ -414,6 +463,19 @@
           accent="#8ab4f8"
         />
       </div>
+      {#if todayMicros.length}
+        <div class="today-micros">
+          <h3 class="text-title-3">Today’s micros</h3>
+          <ul class="micro-list text-caption">
+            {#each todayMicros as row}
+              <li>
+                <span>{row.label}</span>
+                <span>{microDisplay(row)}</span>
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {/if}
     </section>
   {/if}
 
@@ -635,6 +697,62 @@
 
   .swap-results button:hover {
     background: var(--color-surface-hover);
+  }
+
+  .weekly-block {
+    margin-top: var(--space-8);
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  .weekly-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    font-weight: 600;
+  }
+
+  .weekly-micros {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-3) 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-2);
+    color: var(--color-text-secondary);
+  }
+
+  .progress {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-secondary);
+  }
+
+  .today-micros {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .today-micros h3 {
+    margin: 0 0 var(--space-3);
+  }
+
+  .micro-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-2);
+  }
+
+  .micro-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
   }
 
   .summary {

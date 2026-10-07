@@ -28,8 +28,10 @@ from marrow.services.user_profile import (
     complete_onboarding,
     get_user_profile,
     preview_metabolic_plan,
+    quick_start_tracking,
     update_macro_targets,
 )
+from marrow.services.weekly_nutrition import get_weekly_nutrition_average
 from marrow.services.night_review import get_night_review
 from marrow.services.voice_input import capture_and_transcribe, get_last_voice_transcript
 from marrow.services.diary_history import get_diary_history_month, get_diary_history_range
@@ -170,6 +172,14 @@ class BridgeApi:
     def complete_onboarding(self, payload: dict) -> dict:
         with session() as conn:
             return complete_onboarding(conn, payload)
+
+    def quick_start_tracking(self) -> dict:
+        with session() as conn:
+            return quick_start_tracking(conn)
+
+    def get_weekly_nutrition_average(self, end_date: str | None = None) -> dict:
+        with session() as conn:
+            return get_weekly_nutrition_average(conn, end_date)
 
     def update_macro_targets(self, payload: dict) -> dict:
         with session() as conn:

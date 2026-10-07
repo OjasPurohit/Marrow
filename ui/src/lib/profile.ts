@@ -72,3 +72,11 @@ export async function completeOnboarding(payload: Record<string, unknown>): Prom
   }
   throw new Error('Profile bridge unavailable');
 }
+
+export async function quickStartTracking(): Promise<UserProfile> {
+  const a = api();
+  if (a?.quick_start_tracking) {
+    return a.quick_start_tracking() as Promise<UserProfile>;
+  }
+  throw new Error('Profile bridge unavailable');
+}
