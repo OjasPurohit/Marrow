@@ -1,22 +1,6 @@
 """Bundled catalog import."""
 
-from pathlib import Path
-
-from marrow.data.catalog_seed import (
-    _bundled_attach_uri,
-    catalog_seed_status,
-    ensure_catalog_seeded,
-)
-from marrow.data.migrator import migrate
-
-
-def test_bundled_attach_uri_windows_safe():
-    uri = _bundled_attach_uri(
-        Path("C:/Work/Marrow/marrow/data/processed/foods_catalog.sqlite")
-    )
-    assert uri.startswith("file:///")
-    assert "\\" not in uri
-    assert uri.endswith("?mode=ro")
+from marrow.data.catalog_seed import catalog_seed_status, ensure_catalog_seeded
 
 
 def test_catalog_seed_imports_foods(user_db):

@@ -66,32 +66,31 @@ def ensure_catalog_seeded(conn: sqlite3.Connection) -> int:
     return imported
 
 
-def _bundled_attach_uri(bundled_path: Path) -> str:
-    """SQLite ATTACH URI (forward slashes; required on Windows)."""
-    return f"{bundled_path.resolve().as_uri()}?mode=ro"
-
-
 def _import_bundled_catalog(conn: sqlite3.Connection, bundled_path: Path) -> int:
-    """Merge bundled catalog rows into user DB (catalog sources only)."""
-    uri = _bundled_attach_uri(bundled_path)
-    conn.execute("ATTACH DATABASE ? AS bundled", (uri,))
-    try:
-        sources = ("usda", "off", "ifct", "sample")
-        placeholders = ", ".join("?" for _ in sources)
-        existing = conn.execute(
-            f"""
-            SELECT source, source_food_id FROM foods
-            WHERE source IN ({placeholders})
-            """,
-            sources,
-        ).fetchall()
-        existing_keys = {(r[0], r[1]) for r in existing}
+    """Merge bundled catalog rows into user DB (catalog sources only).
 
-        rows = conn.execute(
+    Uses a separate Connection (no ATTACH): Windows Python sqlite3 often fails
+    to open URI or path ATTACH for read-only catalog files.
+    """
+    sources = ("usda", "off", "ifct", "sample")
+    placeholders = ", ".join("?" for _ in sources)
+    existing = conn.execute(
+        f"""
+        SELECT source, source_food_id FROM foods
+        WHERE source IN ({placeholders})
+        """,
+        sources,
+    ).fetchall()
+    existing_keys = {(r[0], r[1]) for r in existing}
+
+    bundled = sqlite3.connect(str(bundled_path.resolve()))
+    bundled.row_factory = sqlite3.Row
+    try:
+        rows = bundled.execute(
             f"""
             SELECT id, source, source_food_id, name, name_normalized, basis,
                    preparation, data_quality, brand, barcode, locale
-            FROM bundled.foods
+            FROM foods
             WHERE source IN ({placeholders})
             """,
             sources,
@@ -127,8 +126,8 @@ def _import_bundled_catalog(conn: sqlite3.Connection, bundled_path: Path) -> int
             new_id = int(cur.fetchone()[0])
             bundled_food_id = int(row["id"])
 
-            n = conn.execute(
-                f"SELECT {nutrient_cols} FROM bundled.food_nutrients WHERE food_id = ?",
+            n = bundled.execute(
+                f"SELECT {nutrient_cols} FROM food_nutrients WHERE food_id = ?",
                 (bundled_food_id,),
             ).fetchone()
             if n:
@@ -140,10 +139,10 @@ def _import_bundled_catalog(conn: sqlite3.Connection, bundled_path: Path) -> int
                     (new_id, *[n[c] for c in NUTRIENT_COLUMN_NAMES]),
                 )
 
-            servings = conn.execute(
+            servings = bundled.execute(
                 """
                 SELECT label, amount, unit, grams_equivalent, is_default, sort_order
-                FROM bundled.food_servings WHERE food_id = ?
+                FROM food_servings WHERE food_id = ?
                 ORDER BY sort_order
                 """,
                 (bundled_food_id,),
@@ -169,5 +168,4 @@ def _import_bundled_catalog(conn: sqlite3.Connection, bundled_path: Path) -> int
         conn.commit()
         return imported
     finally:
-        conn.commit()
-        conn.execute("DETACH DATABASE bundled")
+        bundled.close()
