@@ -86,7 +86,8 @@ tests/            pytest
 | **M2** Food ingestion | Done | Unified schema, ingest pipeline, bundled catalog subset |
 | **M3** Food search | Done | FTS5 search, serving conversion, custom foods & recipes |
 | **M4** NL parser & diary | Done | Rule-based parse, confirmation UI, diary schema |
-| **M4+** Goals, charts, sync | Planned | See project spec |
+| **M5** Today & totals | Done | Rings/bars, meal groups, timeline, daily aggregation |
+| **M6+** Goals, charts, sync | Planned | Real targets/onboarding; see project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).
 

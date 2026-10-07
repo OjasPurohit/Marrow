@@ -7,9 +7,17 @@ from datetime import date
 
 from marrow.services.food_detail import convert_food_serving
 from marrow.services.food_repository import fetch_food_row
+from marrow.services.diary_totals import (
+    PLACEHOLDER_DAILY_TARGETS,
+    group_entries_by_meal,
+    remaining_budget,
+    summarize_diary_nutrients,
+)
 from marrow.services.nutrient_validation import collect_nutrient_warnings, nutrients_for_display
 
-MEAL_TAGS = frozenset({"breakfast", "lunch", "dinner", "snack"})
+MEAL_TAGS = frozenset(
+    {"breakfast", "lunch", "dinner", "snack", "pre_workout", "post_workout"}
+)
 
 
 def _local_today() -> str:
@@ -101,7 +109,7 @@ def confirm_and_save_log(conn: sqlite3.Connection, payload: dict) -> dict:
         )
 
     conn.commit()
-    totals = summarize_entries(saved)
+    totals = _totals_payload(saved)
     return {
         "log_id": log_id,
         "log_date": log_date,
@@ -111,18 +119,31 @@ def confirm_and_save_log(conn: sqlite3.Connection, payload: dict) -> dict:
     }
 
 
-def summarize_entries(entries: list[dict]) -> dict:
-    total_kcal = 0.0
-    kcal_known = True
-    for entry in entries:
-        kcal = entry.get("energy_kcal")
-        if kcal is None:
-            kcal_known = False
-        else:
-            total_kcal += float(kcal)
+def _totals_payload(entries: list[dict]) -> dict:
+    nutrients = summarize_diary_nutrients(entries)
     return {
-        "energy_kcal": round(total_kcal, 1) if kcal_known else None,
+        **nutrients,
         "entry_count": len(entries),
+        "targets": dict(PLACEHOLDER_DAILY_TARGETS),
+        "remaining": remaining_budget(nutrients),
+    }
+
+
+def summarize_entries(entries: list[dict]) -> dict:
+    """Backward-compatible summary for a single save batch."""
+    nutrients = summarize_diary_nutrients(entries)
+    return {**nutrients, "entry_count": len(entries)}
+
+
+def get_daily_nutrient_totals(
+    conn: sqlite3.Connection,
+    log_date: str | None = None,
+) -> dict:
+    day = list_diary_entries_for_date(conn, log_date)
+    return {
+        "log_date": day["log_date"],
+        "totals": day["totals"],
+        "meals": day["meals"],
     }
 
 
@@ -159,14 +180,8 @@ def list_diary_entries_for_date(
     ).fetchall()
 
     entries = []
-    total_kcal = 0.0
-    kcal_known = True
     for row in rows:
         kcal = row["energy_kcal"]
-        if kcal is None:
-            kcal_known = False
-        else:
-            total_kcal += float(kcal)
         entries.append(
             {
                 "entry_id": int(row["entry_id"]),
@@ -187,19 +202,18 @@ def list_diary_entries_for_date(
             }
         )
 
-    energy_total: float | None
-    if not entries:
-        energy_total = None
-    elif kcal_known:
-        energy_total = round(total_kcal, 1)
-    else:
-        energy_total = None
+    nutrients = summarize_diary_nutrients(entries)
+    totals = {
+        **nutrients,
+        "entry_count": len(entries),
+        "targets": dict(PLACEHOLDER_DAILY_TARGETS),
+        "remaining": remaining_budget(nutrients),
+    }
+    meals = group_entries_by_meal(entries)
 
     return {
         "log_date": day,
         "entries": entries,
-        "totals": {
-            "energy_kcal": energy_total,
-            "entry_count": len(entries),
-        },
+        "meals": meals,
+        "totals": totals,
     }

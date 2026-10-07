@@ -27,6 +27,25 @@ export type ParseFoodTextResponse = {
   groq_used: boolean;
 };
 
+export type DiaryNutrients = {
+  energy_kcal: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+};
+
+export type DiaryTotals = DiaryNutrients & {
+  entry_count: number;
+  targets: Record<string, number>;
+  remaining: DiaryNutrients;
+};
+
+export type DiaryMealSection = {
+  meal_tag: string;
+  entries: DiaryEntry[];
+  totals: DiaryNutrients;
+};
+
 export type DiaryEntry = {
   entry_id: number;
   log_id: number;
@@ -37,6 +56,9 @@ export type DiaryEntry = {
   unit: string;
   grams_equivalent: number;
   energy_kcal: number | null;
+  protein_g?: number | null;
+  carbs_g?: number | null;
+  fat_g?: number | null;
   match_confidence: string;
   raw_fragment: string | null;
   logged_at: string;
@@ -45,7 +67,8 @@ export type DiaryEntry = {
 export type DiaryDayResponse = {
   log_date: string;
   entries: DiaryEntry[];
-  totals: { energy_kcal: number | null; entry_count: number };
+  meals: DiaryMealSection[];
+  totals: DiaryTotals;
 };
 
 function api() {
@@ -95,7 +118,40 @@ export async function listDiaryEntriesForDate(logDate?: string): Promise<DiaryDa
   if (a?.list_diary_entries_for_date) {
     return a.list_diary_entries_for_date(logDate ?? null) as Promise<DiaryDayResponse>;
   }
-  return { log_date: logDate ?? '', entries: [], totals: { energy_kcal: null, entry_count: 0 } };
+  const emptyNutrients: DiaryNutrients = {
+    energy_kcal: null,
+    protein_g: null,
+    carbs_g: null,
+    fat_g: null,
+  };
+  return {
+    log_date: logDate ?? '',
+    entries: [],
+    meals: [],
+    totals: {
+      ...emptyNutrients,
+      entry_count: 0,
+      targets: {},
+      remaining: emptyNutrients,
+    },
+  };
+}
+
+export async function getDailyNutrientTotals(logDate?: string): Promise<{
+  log_date: string;
+  totals: DiaryTotals;
+  meals: DiaryMealSection[];
+}> {
+  const a = api();
+  if (a?.get_daily_nutrient_totals) {
+    return a.get_daily_nutrient_totals(logDate ?? null) as Promise<{
+      log_date: string;
+      totals: DiaryTotals;
+      meals: DiaryMealSection[];
+    }>;
+  }
+  const day = await listDiaryEntriesForDate(logDate);
+  return { log_date: day.log_date, totals: day.totals, meals: day.meals };
 }
 
 export async function swapDraftFood(

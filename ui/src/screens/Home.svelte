@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import Button from '@/components/Button.svelte';
   import Card from '@/components/Card.svelte';
-  import { getAppInfo, ping, type AppInfo } from '@/lib/bridge';
+  import MacroBar from '@/components/MacroBar.svelte';
+  import NutrientRing from '@/components/NutrientRing.svelte';
   import {
     confirmAndSaveLog,
     ensureDiaryBridge,
@@ -10,14 +11,12 @@
     parseFoodText,
     searchFoodsForSwap,
     swapDraftFood,
-    type DiaryEntry,
+    type DiaryDayResponse,
     type ParseDraftItem,
   } from '@/lib/diary';
-  import { confidenceLabel, formatAmount, formatKcal } from '@/lib/parseQuantity';
+  import { confidenceLabel, formatAmount, formatGrams, formatKcal } from '@/lib/parseQuantity';
   import type { FoodSearchResult } from '@/lib/foods';
 
-  let info: AppInfo | null = $state(null);
-  let bridgeStatus = $state('…');
   let logText = $state('');
   let mealTag = $state('lunch');
   let parsing = $state(false);
@@ -25,23 +24,35 @@
   let error = $state<string | null>(null);
   let drafts: ParseDraftItem[] = $state([]);
   let showConfirm = $state(false);
-  let todayEntries: DiaryEntry[] = $state([]);
-  let todayKcal: number | null = $state(null);
+  let day: DiaryDayResponse | null = $state(null);
   let swapDraftId: string | null = $state(null);
   let swapQuery = $state('');
   let swapResults: FoodSearchResult[] = $state([]);
 
-  const mealOptions = ['breakfast', 'lunch', 'dinner', 'snack'];
+  const mealOptions = [
+    'breakfast',
+    'lunch',
+    'dinner',
+    'snack',
+    'pre_workout',
+    'post_workout',
+  ];
+
+  const mealLabels: Record<string, string> = {
+    breakfast: 'Breakfast',
+    lunch: 'Lunch',
+    dinner: 'Dinner',
+    snack: 'Snack',
+    pre_workout: 'Pre-workout',
+    post_workout: 'Post-workout',
+    other: 'Other',
+  };
 
   async function refreshToday() {
-    const day = await listDiaryEntriesForDate();
-    todayEntries = day.entries;
-    todayKcal = day.totals.energy_kcal;
+    day = await listDiaryEntriesForDate();
   }
 
   onMount(async () => {
-    bridgeStatus = await ping();
-    info = await getAppInfo();
     await ensureDiaryBridge();
     await refreshToday();
   });
@@ -124,6 +135,20 @@
       saving = false;
     }
   }
+
+  function mealLabel(tag: string): string {
+    return mealLabels[tag] ?? tag.replace(/_/g, ' ');
+  }
+
+  function formatLoggedAt(iso: string): string {
+    const d = new Date(iso.replace(' ', 'T'));
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  const totals = $derived(day?.totals);
+  const targets = $derived(totals?.targets ?? {});
+  const remaining = $derived(totals?.remaining);
 </script>
 
 <main class="home">
@@ -141,7 +166,7 @@
         <span class="text-caption">Meal</span>
         <select bind:value={mealTag}>
           {#each mealOptions as tag}
-            <option value={tag}>{tag}</option>
+            <option value={tag}>{mealLabel(tag)}</option>
           {/each}
         </select>
       </label>
@@ -224,41 +249,127 @@
     </Card>
   {/if}
 
-  <div class="grid">
-    <Card title="Bridge" subtitle="Python ↔ UI connection">
-      <dl class="meta-dl">
-        <dt>Status</dt>
-        <dd>{bridgeStatus}</dd>
-        {#if info}
-          <dt>Version</dt>
-          <dd>{info.version}</dd>
-          <dt>Schema</dt>
-          <dd>v{info.schema_version}</dd>
-        {/if}
-      </dl>
-    </Card>
-
-    <Card title="Today's log" subtitle="Confirmed entries">
-      <div class="rings">
-        <div class="ring-label">
-          <span class="text-title-2">{formatKcal(todayKcal)}</span>
-          <span class="text-caption">kcal logged</span>
-        </div>
+  {#if totals}
+    <section class="summary">
+      <div class="summary-head">
+        <h2 class="text-title-2">Running totals</h2>
+        <p class="text-caption budget-note">Budget targets are placeholders until goals onboarding (M6).</p>
       </div>
-      {#if todayEntries.length}
-        <ul class="today-list">
-          {#each todayEntries as entry (entry.entry_id)}
-            <li>
+      <div class="rings-row">
+        <NutrientRing
+          label="kcal"
+          value={totals.energy_kcal}
+          target={targets.energy_kcal ?? 2200}
+          accent="var(--color-accent)"
+        />
+        <NutrientRing
+          label="protein"
+          value={totals.protein_g}
+          target={targets.protein_g ?? 150}
+          accent="var(--color-success)"
+        />
+        <NutrientRing
+          label="carbs"
+          value={totals.carbs_g}
+          target={targets.carbs_g ?? 220}
+          accent="var(--color-warning)"
+        />
+        <NutrientRing
+          label="fat"
+          value={totals.fat_g}
+          target={targets.fat_g ?? 70}
+          accent="#8ab4f8"
+        />
+        <NutrientRing
+          label="left kcal"
+          value={remaining?.energy_kcal}
+          target={targets.energy_kcal ?? 2200}
+          accent="var(--color-text-secondary)"
+          size={72}
+        />
+      </div>
+      <div class="bars">
+        <MacroBar
+          label="Calories"
+          value={totals.energy_kcal}
+          target={targets.energy_kcal ?? 2200}
+          remaining={remaining?.energy_kcal ?? null}
+          unit=" kcal"
+          accent="var(--color-accent)"
+        />
+        <MacroBar
+          label="Protein"
+          value={totals.protein_g}
+          target={targets.protein_g ?? 150}
+          remaining={remaining?.protein_g ?? null}
+          unit="g"
+          accent="var(--color-success)"
+        />
+        <MacroBar
+          label="Carbs"
+          value={totals.carbs_g}
+          target={targets.carbs_g ?? 220}
+          remaining={remaining?.carbs_g ?? null}
+          unit="g"
+          accent="var(--color-warning)"
+        />
+        <MacroBar
+          label="Fat"
+          value={totals.fat_g}
+          target={targets.fat_g ?? 70}
+          remaining={remaining?.fat_g ?? null}
+          unit="g"
+          accent="#8ab4f8"
+        />
+      </div>
+    </section>
+  {/if}
+
+  <section class="meals">
+    <h2 class="text-title-2">Meals so far</h2>
+    {#if day?.meals?.length}
+      {#each day.meals as section (section.meal_tag)}
+        <article class="meal-section">
+          <header>
+            <h3 class="text-title-3">{mealLabel(section.meal_tag)}</h3>
+            <span class="meal-total text-caption">
+              {formatKcal(section.totals.energy_kcal)} kcal · {formatGrams(section.totals.protein_g)} protein
+            </span>
+          </header>
+          <ul class="meal-items">
+            {#each section.entries as entry (entry.entry_id)}
+              <li>
+                <span>{formatAmount(entry.amount)} {entry.unit} {entry.food_name}</span>
+                <span class="kcal">{formatKcal(entry.energy_kcal)} kcal</span>
+              </li>
+            {/each}
+          </ul>
+        </article>
+      {/each}
+    {:else}
+      <p class="text-caption empty">Nothing logged yet today.</p>
+    {/if}
+  </section>
+
+  <section class="timeline">
+    <h2 class="text-title-2">Timeline</h2>
+    {#if day?.entries?.length}
+      <ol class="timeline-list">
+        {#each day.entries as entry (entry.entry_id)}
+          <li>
+            <time class="text-caption">{formatLoggedAt(entry.logged_at)}</time>
+            <div class="timeline-body">
+              <span class="meal-pill">{mealLabel(entry.meal_tag)}</span>
               <span>{formatAmount(entry.amount)} {entry.unit} {entry.food_name}</span>
               <span class="kcal">{formatKcal(entry.energy_kcal)} kcal</span>
-            </li>
-          {/each}
-        </ul>
-      {:else}
-        <p class="text-caption empty">Nothing logged yet today.</p>
-      {/if}
-    </Card>
-  </div>
+            </div>
+          </li>
+        {/each}
+      </ol>
+    {:else}
+      <p class="text-caption empty">Your day’s log will appear here in order.</p>
+    {/if}
+  </section>
 </main>
 
 <style>
@@ -404,56 +515,120 @@
     background: var(--color-surface-hover);
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-6);
+  .summary {
     margin-top: var(--space-8);
+    padding: var(--space-6);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-grouped);
+    border: 1px solid var(--color-border-subtle);
   }
 
-  .meta-dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-2) var(--space-4);
-    margin: 0;
+  .summary-head {
+    margin-bottom: var(--space-5);
   }
 
-  .meta-dl dt {
+  .budget-note {
+    margin: var(--space-1) 0 0;
     color: var(--color-text-tertiary);
-    font-size: 0.8125rem;
   }
 
-  .meta-dl dd {
-    margin: 0;
-  }
-
-  .rings {
+  .rings-row {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
     justify-content: center;
-    min-height: 80px;
-    align-items: center;
+    margin-bottom: var(--space-6);
   }
 
-  .ring-label {
-    text-align: center;
+  .bars {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-4);
   }
 
-  .today-list {
+  .meals,
+  .timeline {
+    margin-top: var(--space-10);
+  }
+
+  .meal-section {
+    margin-top: var(--space-5);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  .meal-section header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .meal-section h3 {
+    margin: 0;
+  }
+
+  .meal-total {
+    color: var(--color-text-secondary);
+  }
+
+  .meal-items {
     list-style: none;
     padding: 0;
-    margin: var(--space-4) 0 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
   }
 
-  .today-list li {
+  .meal-items li {
     display: flex;
     justify-content: space-between;
     font-size: 0.9375rem;
+  }
+
+  .timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    border-left: 2px solid var(--color-border-subtle);
+  }
+
+  .timeline-list li {
+    position: relative;
+    padding: 0 0 var(--space-4) var(--space-5);
+  }
+
+  .timeline-list li::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 0.35rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .timeline-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+
+  .meal-pill {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-muted);
+    color: var(--color-text-secondary);
   }
 
   .kcal {

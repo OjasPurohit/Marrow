@@ -98,3 +98,23 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 
 - Macro–kcal consistency warning (~10% tolerance) via `nutrient_validation.py`.
 - Portion / per-item kcal sanity warnings; `NULL` nutrients stay `null` end-to-end (never coerced to 0 in API or UI display helpers).
+
+## 2025-10-07 — M5 Today screen & daily totals
+
+### Daily aggregation
+
+- `marrow/services/diary_totals.py` — sum `energy_kcal`, `protein_g`, `carbs_g`, `fat_g` from persisted diary entries; **any NULL in a column makes that day’s total NULL** for that nutrient.
+- `list_diary_entries_for_date` returns `meals` (grouped by `meal_tag`), `totals` (macros + `targets` + `remaining`), and flat `entries` for the timeline.
+- `get_daily_nutrient_totals` bridge alias for the same payload shape (totals-focused clients).
+
+### Placeholder budgets (until M6)
+
+- Fixed defaults in `PLACEHOLDER_DAILY_TARGETS` (2200 kcal, 150 g protein, etc.); UI labels them as placeholders.
+
+### Meal tags
+
+- Migration `005_diary_workout_meal_tags.sql` adds `pre_workout` and `post_workout` to `diary_logs.meal_tag`.
+
+### Today UI
+
+- Hand-built SVG `NutrientRing` + `MacroBar` components using design tokens (no chart library).

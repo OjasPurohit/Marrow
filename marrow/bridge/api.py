@@ -10,7 +10,11 @@ from marrow.services.custom_foods import create_custom_food
 from marrow.services.food_detail import convert_food_serving, get_food_detail
 from marrow.services.food_repository import fetch_servings
 from marrow.services.food_search import search_foods
-from marrow.services.diary_log import confirm_and_save_log, list_diary_entries_for_date
+from marrow.services.diary_log import (
+    confirm_and_save_log,
+    get_daily_nutrient_totals,
+    list_diary_entries_for_date,
+)
 from marrow.services.diary_parse import parse_food_text
 from marrow.services.recipes import create_recipe, get_recipe
 
@@ -99,3 +103,7 @@ class BridgeApi:
     def list_diary_entries_for_date(self, log_date: str | None = None) -> dict:
         with session() as conn:
             return list_diary_entries_for_date(conn, log_date)
+
+    def get_daily_nutrient_totals(self, log_date: str | None = None) -> dict:
+        with session() as conn:
+            return get_daily_nutrient_totals(conn, log_date)
