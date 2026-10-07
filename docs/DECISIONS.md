@@ -143,3 +143,21 @@ Recorded decisions for the Marrow build. When the [Apple design reference](https
 
 - First-launch **onboarding** overlay (editable suggested macros, disclaimer acknowledgement).
 - **Profile** nav route (`#/profile`) for read-only target summary until M10 settings.
+
+## 2025-10-07 — M7 night review
+
+### Aggregation
+
+- `marrow/services/night_review.py` — scales full food nutrient panels per diary entry (`grams_equivalent`), sums with per-nutrient coverage (partial totals when some entries lack data).
+- Macro totals for energy balance still use persisted diary entry macros (`diary_totals` NULL rules).
+- Top food contributors per nutrient; rule-based `summary_lines`; `groq_summary` stub `null` for M8.
+
+### Flags & confidence
+
+- Low (&lt;70% of target) / high (&gt;120%, or upper-limit nutrients like sodium) vs macro + micronutrient targets.
+- `estimated_confidence` — share of logged kcal from `match_confidence=ESTIMATED` entries.
+
+### Bridge & UI
+
+- `get_night_review(log_date?)` on the bridge.
+- Route `#/night-review` (nav **Review**); hand-built SVG macro split + micro bars (`MacroSplitSvg`, `MicroBarSvg`).

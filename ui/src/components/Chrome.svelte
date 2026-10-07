@@ -26,6 +26,13 @@
       </button>
       <button
         type="button"
+        class:active={route === 'nightReview'}
+        onclick={() => onNavigate?.('nightReview')}
+      >
+        Review
+      </button>
+      <button
+        type="button"
         class:active={route === 'foods'}
         onclick={() => onNavigate?.('foods')}
       >

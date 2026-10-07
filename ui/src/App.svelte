@@ -5,6 +5,7 @@
   import Home from '@/screens/Home.svelte';
   import Foods from '@/screens/Foods.svelte';
   import Profile from '@/screens/Profile.svelte';
+  import NightReview from '@/screens/NightReview.svelte';
   import Onboarding from '@/screens/Onboarding.svelte';
   import Gallery from '@/screens/gallery/Gallery.svelte';
   import { ensureProfileBridge, getUserProfile } from '@/lib/profile';
@@ -21,6 +22,7 @@
     if (next === 'gallery') location.hash = '/gallery';
     else if (next === 'foods') location.hash = '/foods';
     else if (next === 'profile') location.hash = '/profile';
+    else if (next === 'nightReview') location.hash = '/night-review';
     else location.hash = '/';
   }
 
@@ -53,6 +55,8 @@
   <Foods />
 {:else if route === 'profile'}
   <Profile />
+{:else if route === 'nightReview' && profileChecked}
+  <NightReview />
 {:else if profileChecked}
   <Home />
 {/if}

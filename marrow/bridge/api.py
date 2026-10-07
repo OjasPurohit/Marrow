@@ -23,6 +23,7 @@ from marrow.services.user_profile import (
     preview_metabolic_plan,
     update_macro_targets,
 )
+from marrow.services.night_review import get_night_review
 from marrow.services.weight_log import add_weight_entry, list_weight_entries
 
 
@@ -114,6 +115,10 @@ class BridgeApi:
     def get_daily_nutrient_totals(self, log_date: str | None = None) -> dict:
         with session() as conn:
             return get_daily_nutrient_totals(conn, log_date)
+
+    def get_night_review(self, log_date: str | None = None) -> dict:
+        with session() as conn:
+            return get_night_review(conn, log_date)
 
     def get_user_profile(self) -> dict:
         with session() as conn:

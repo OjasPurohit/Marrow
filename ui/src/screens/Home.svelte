@@ -166,6 +166,7 @@
     <p class="text-body lede">
       Type what you ate — quantities, roti, katori, Hinglish works. Review before it hits your diary.
     </p>
+    <a class="night-link text-caption" href="#/night-review">Open night review →</a>
   </div>
 
   <Card title="Quick log" subtitle="Parse → confirm → save">
@@ -409,6 +410,14 @@
   .hero h1 {
     margin: var(--space-2) 0 var(--space-4);
     max-width: 16ch;
+  }
+
+  .night-link {
+    display: inline-block;
+    margin-top: var(--space-3);
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
   }
 
   .lede {

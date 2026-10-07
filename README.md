@@ -88,7 +88,8 @@ tests/            pytest
 | **M4** NL parser & diary | Done | Rule-based parse, confirmation UI, diary schema |
 | **M5** Today & totals | Done | Rings/bars, meal groups, timeline, daily aggregation |
 | **M6** Goals & onboarding | Done | Mifflin-St Jeor, DB targets, deficit/surplus, weight log |
-| **M7+** Charts, sync | Planned | See project spec |
+| **M7** Night review | Done | Full-day micro report, flags, rule summary, `#/night-review` |
+| **M8+** Groq, sync | Planned | See project spec |
 
 Decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md).
 

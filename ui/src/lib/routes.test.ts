@@ -19,8 +19,13 @@ describe('routes', () => {
     expect(parseRoute('#/profile')).toBe('profile');
   });
 
+  it('parses night review', () => {
+    expect(parseRoute('#/night-review')).toBe('nightReview');
+  });
+
   it('builds hrefs', () => {
     expect(routeHref('gallery')).toBe('#/gallery');
+    expect(routeHref('nightReview')).toBe('#/night-review');
     expect(routeHref('foods')).toBe('#/foods');
     expect(routeHref('profile')).toBe('#/profile');
     expect(routeHref('home')).toBe('#/');
