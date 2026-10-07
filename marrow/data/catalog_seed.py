@@ -66,9 +66,14 @@ def ensure_catalog_seeded(conn: sqlite3.Connection) -> int:
     return imported
 
 
+def _bundled_attach_uri(bundled_path: Path) -> str:
+    """SQLite ATTACH URI (forward slashes; required on Windows)."""
+    return f"{bundled_path.resolve().as_uri()}?mode=ro"
+
+
 def _import_bundled_catalog(conn: sqlite3.Connection, bundled_path: Path) -> int:
     """Merge bundled catalog rows into user DB (catalog sources only)."""
-    uri = f"file:{bundled_path.resolve()}?mode=ro"
+    uri = _bundled_attach_uri(bundled_path)
     conn.execute("ATTACH DATABASE ? AS bundled", (uri,))
     try:
         sources = ("usda", "off", "ifct", "sample")
